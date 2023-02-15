@@ -65,7 +65,10 @@ class GitFileListComponent extends React.Component<{
             }
         }).then(() => {
             this.readDirRec(this.dir).then(paths => {
-                const files = paths.filter(e => !e.endsWith('/'))
+                const files = paths
+                    .filter(e => !e.endsWith('/'))
+                    .sort((a, b) => a.localeCompare(b))
+
                 this.setState(state => ({...state, files: files, error: undefined}))
             })
         }).catch(error =>
