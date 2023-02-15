@@ -1,10 +1,10 @@
 import React from 'react'
 // @ts-ignore
-import {JSONEditor} from '@json-editor/json-editor/dist/jsoneditor';
+import {JSONEditor} from '@json-editor/json-editor/dist/jsoneditor'
 
-class JsonEditorComponent extends React.Component<{ schema: any }> {
-    private root: React.RefObject<HTMLDivElement>;
-    private editor: any;
+class JsonEditorComponent extends React.Component<{ schema: any, data?: any }> {
+    private root: React.RefObject<HTMLDivElement>
+    private editor: any
 
     constructor(props: any) {
         super(props)
@@ -17,7 +17,14 @@ class JsonEditorComponent extends React.Component<{ schema: any }> {
         this.editor = new JSONEditor(elem, {
             theme: 'bootstrap5',
             iconlib: 'openiconic',
-            schema: this.props.schema
+            schema: this.props.schema,
+            startval: this.props.data,
+            show_errors: 'change'
+        })
+        console.log(this.editor)
+        this.editor.on('change', () => {
+            console.log("validate")
+            console.log(this.editor.validate())
         })
     }
 
@@ -44,7 +51,7 @@ class JsonEditorComponent extends React.Component<{ schema: any }> {
     }
 
     render() {
-        return <div ref={this.root}></div>
+        return <div ref={this.root}/>
     }
 }
 
