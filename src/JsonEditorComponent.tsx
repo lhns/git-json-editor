@@ -25,10 +25,9 @@ class JsonEditorComponent extends React.Component<{
             startval: this.props.data
             //show_errors: 'change'
         })
-        console.log(this.editor)
         this.editor.on('change', () => {
-            console.log("validate")
-            console.log(this.editor.validate())
+            //console.log("validate")
+            //console.log(this.editor.validate())
             let value = this.editor.getValue()
             if (typeof value === 'object') {
                 value = {

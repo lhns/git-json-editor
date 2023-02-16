@@ -1,10 +1,10 @@
 import React from 'react'
 import * as git from 'isomorphic-git'
 import {v4 as uuidv4} from "uuid"
-import FileListComponent from './FileListComponent'
+import SelectList from './SelectList'
 import {readDirRec} from './Utils'
 
-class CommitDialogComponent extends React.Component<{
+class CommitDialog extends React.Component<{
     disabled?: boolean,
     onCommit: (message: string) => void
 }, {
@@ -38,4 +38,4 @@ class CommitDialogComponent extends React.Component<{
     }
 }
 
-export default CommitDialogComponent
+export default CommitDialog

@@ -24,15 +24,16 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
             <div>
                 No git url provided
             </div> :
-            <MainComponent gitOpts={{
-                fs: fs,
-                http: http,
-                url: url,
-                auth: {
-                    username: 'oauth2',
-                    password: 'glpat-rmv7bQDokFmR2i1YZaDd'
-                },
-                corsProxy: corsProxy ? corsProxy : undefined
-            }}/>
+            <MainComponent
+                fs={fs}
+                gitCloneOpts={{
+                    http: http,
+                    url: url,
+                    auth: {
+                        username: 'token', //oauth2
+                        password: ''
+                    },
+                    corsProxy: corsProxy || undefined
+                }}/>
     }</React.StrictMode>,
 )
