@@ -2,8 +2,11 @@ import React from 'react'
 import GitFileListComponent from './GitFileListComponent'
 import type {GitOpts} from './GitFileListComponent'
 import JsonEditorComponent from "./JsonEditorComponent"
+import {isMetaSchemaUrl, withCorsProxy} from "./Utils";
+import ScrollPane from "./ScrollPane";
 
 class MainComponent extends React.Component<{ gitOpts: GitOpts }, {
+    selectedFile: string,
     schema?: string,
     data?: string,
     schemaError?: string,
@@ -18,32 +21,37 @@ class MainComponent extends React.Component<{ gitOpts: GitOpts }, {
             </div>
         } else {
             return <div className="h-100 d-flex flex-row gap-2">
-                <div className="overflow-auto h-100" style={{
+                <div className="h-100" style={{
                     width: '18em',
                     borderRight: '1px solid var(--bs-gray-400)'
                 }}>
                     <GitFileListComponent gitOpts={this.props.gitOpts}
-                                          onSelect={string => {
-                                              Promise.resolve(null)
-                                                  .then(() => {
-                                                      const data = JSON.parse(string)
-                                                      const ref = data['$ref']
-                                                      if (ref == null) throw new Error('$ref is not defined')
-                                                      const withCorsProxy = (url: string) =>
-                                                          this.props.gitOpts.corsProxy ? this.props.gitOpts.corsProxy
-                                                                  .replace(/\/?$/, '/') +
-                                                              url.replace(/^https?:\/\//, '') : url
-
-                                                      return fetch(withCorsProxy(ref))
-                                                          .then((response) => response.json())
-                                                          .then(schema => this.setState((state) => ({
+                                          onSelect={file => {
+                                              this.setState(state => ({...state, selectedFile: file}))
+                                              this.props.gitOpts.fs.promises.readFile(file, {encoding: 'utf8'})
+                                                  .then((string: string) => {
+                                                      const loadJsonEditor = (schema: string, data?: string) => {
+                                                          return this.setState((state) => ({
                                                               ...state,
                                                               schema: schema,
                                                               data: data,
                                                               schemaError: undefined
-                                                          })))
+                                                          }))
+                                                      }
+
+                                                      const data = JSON.parse(string)
+                                                      const schemaUrl = data['$schema']
+                                                      if (schemaUrl == null) {
+                                                          throw new Error('$schema is not defined')
+                                                      } else if (isMetaSchemaUrl(schemaUrl)) {
+                                                          return loadJsonEditor(data, undefined)
+                                                      } else {
+                                                          return fetch(withCorsProxy(schemaUrl, this.props.gitOpts.corsProxy))
+                                                              .then((response) => response.json())
+                                                              .then(schema => loadJsonEditor(schema, data))
+                                                      }
                                                   })
-                                                  .catch(error => {
+                                                  .catch((error: Error) => {
                                                       console.error(error)
                                                       this.setState((state) => ({
                                                           ...state,
@@ -57,16 +65,29 @@ class MainComponent extends React.Component<{ gitOpts: GitOpts }, {
                                               this.setState(state => ({...state, globalError: error.stack}))
                                           }/>
                 </div>
-                <div className="overflow-auto flex-fill">
-                    {this.state?.schema != null ?
-                        <JsonEditorComponent schema={this.state.schema} data={this.state.data}/> :
-                        this.state?.schemaError != null ?
-                            <div className="p-2">
-                                <div className="alert alert-danger" role="alert">
-                                    {this.state.schemaError}
-                                </div>
-                            </div> :
-                            null}
+                <div className="flex-fill">
+                    <ScrollPane>
+                        {this.state?.schema != null ?
+                            <JsonEditorComponent schema={this.state.schema}
+                                                 data={this.state.data}
+                                                 onChange={data => {
+                                                     const string = JSON.stringify(data, null, 2)
+                                                     console.log(string)
+                                                     this.props.gitOpts.fs.promises.writeFile(
+                                                         this.state.selectedFile,
+                                                         string,
+                                                         {encoding: 'utf8'}
+                                                     )
+                                                 }
+                                                 }/> :
+                            this.state?.schemaError != null ?
+                                <div className="p-2">
+                                    <div className="alert alert-danger" role="alert">
+                                        {this.state.schemaError}
+                                    </div>
+                                </div> :
+                                null}
+                    </ScrollPane>
                 </div>
             </div>
         }

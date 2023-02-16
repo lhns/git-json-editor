@@ -1,6 +1,10 @@
 import React from 'react'
 import * as git from 'isomorphic-git'
 import {v4 as uuidv4} from "uuid"
+import FileListComponent from './FileListComponent'
+import {readDirRec} from './Utils'
+import BranchSelectorComponent from "./BranchSelectorComponent";
+import CommitDialogComponent from "./CommitDialogComponent";
 
 type GitOpts = {
     fs: git.PromiseFsClient,
@@ -12,9 +16,15 @@ type GitOpts = {
 
 class GitFileListComponent extends React.Component<{
     gitOpts: GitOpts,
-    onSelect: (string: string) => void,
+    onSelect: (file: string) => void,
     onError: (error: Error) => void
-}, { selected: string, files: string[] }> {
+}, {
+    loaded: boolean,
+    branches: string[],
+    files: string[],
+    selectedBranch: string,
+    selectedFile: string
+}> {
     private dir: string
 
     constructor(props: any) {
@@ -22,57 +32,62 @@ class GitFileListComponent extends React.Component<{
         this.dir = ''
     }
 
-    private readDirRec(path: string, hidden: boolean = false): Promise<string[]> {
-        const fs = this.props.gitOpts.fs.promises
-        return fs.lstat(path).then((stat: { type: string }) => {
-            if (stat.type === 'dir') {
-                const dir = path.replace(/\/?$/, '/')
-                return fs.readdir(path)
-                    .then((files: string[]) => Promise.all(
-                        files
-                            .filter(fileName => hidden || !fileName.startsWith('.'))
-                            .map(fileName => {
-                                const filePath = dir + fileName
-                                return this.readDirRec(filePath)
-                            })
-                    ))
-                    .then((e: string[][]) => [dir].concat(e.flat()))
-            } else {
-                return [path]
-            }
-        })
-    }
-
     private cloneRepo() {
-        const {gitOpts} = this.props
+        const {gitOpts: {fs, http, url, corsProxy}} = this.props
         this.dir = '/' + uuidv4()
         git.clone({
-            fs: gitOpts.fs,
-            http: gitOpts.http,
+            fs: fs,
+            http: http,
             dir: this.dir,
-            url: gitOpts.url,
+            url: url,
             // @ts-ignore
             onAuth: url => gitOpts.auth,
             // @ts-ignore
             onAuthFailure: (url, auth) => {
                 console.warn("git: failed to authenticate: " + url)
             },
-            corsProxy: gitOpts.corsProxy,
-            singleBranch: true,
-            depth: 1,
+            corsProxy: corsProxy,
+            noCheckout: true,
+            //singleBranch: true,
+            //depth: 1,
             onProgress: e => {
                 console.log(e)
             }
+        }).then(() =>
+            git.listBranches({
+                fs,
+                dir: this.dir,
+                remote: 'origin'
+            }).then(branches => {
+                const filteredBranches = branches.filter(e => e !== 'HEAD')
+                this.setState(state => ({...state, branches: filteredBranches}))
+                console.log(filteredBranches)
+                return filteredBranches
+            })
+        ).then((branches: string[]) =>
+            this.checkout(branches[0])
+        ).catch(error =>
+            this.props.onError(error)
+        )
+    }
+
+    private checkout(branch: string) {
+        const {gitOpts: {fs}} = this.props
+        git.checkout({
+            fs,
+            dir: this.dir,
+            ref: branch,
+            force: true
         }).then(() => {
-            this.readDirRec(this.dir).then(paths => {
+            readDirRec(fs, this.dir).then(paths => {
                 const files = paths
                     .filter(e => !e.endsWith('/'))
                     .sort((a, b) => a.localeCompare(b))
 
                 this.setState(state => ({...state, files: files, error: undefined}))
             })
-        }).catch(error =>
-            this.props.onError(error)
+        }).then(() =>
+            this.setState(state => ({...state, loaded: true}))
         )
     }
 
@@ -91,32 +106,32 @@ class GitFileListComponent extends React.Component<{
 
     render() {
         const {gitOpts: {fs}, onSelect} = this.props
-        const state = this.state
-        if (state == null) {
-            return <div className="d-flex justify-content-center pt-3">
-                <div className="spinner-border" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                </div>
+        const {files, branches, loaded} = this.state || {}
+        const pathPrefix = this.dir.replace(/\/$/, '') + '/'
+        return <div className="h-100 d-flex flex-column p-1 gap-1">
+            <BranchSelectorComponent branches={branches || []} onSelect={branch => {
+                this.setState(state => ({...state, selectedBranch: branch, loaded: false}))
+                this.checkout(branch)
+            }}/>
+            {(files == null || branches == null || !loaded) ?
+                <div className="d-flex justify-content-center pt-3">
+                    <div className="spinner-border" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                    </div>
+                </div> :
+                null}
+            <div className="flex-fill d-flex flex-column">
+                <FileListComponent files={files || []}
+                                   render={e => e.substring(pathPrefix.length)}
+                                   onSelect={file => {
+                                       this.setState(state => ({...state, selectedFile: file}))
+                                       onSelect(file)
+                                   }}/>
             </div>
-        } else {
-            const {files} = state
-            const pathPrefix = this.dir.replace(/\/$/, '') + '/'
-            return <table className="table table-sm table-hover">
-                <tbody>
-                {files.map(file => {
-                    const selected = state.selected === file
-                    return <tr key={file}>
-                        <td className={(selected ? 'table-active' : '')}
-                            onClick={() => {
-                                this.setState(state => ({...state, selected: file}))
-                                fs.promises.readFile(file, {encoding: 'utf8'})
-                                    .then((string: string) => onSelect(string))
-                            }}>{file.substring(pathPrefix.length)}</td>
-                    </tr>
-                })}
-                </tbody>
-            </table>
-        }
+            <div>
+                <CommitDialogComponent onCommit={message => console.log(message)}/>
+            </div>
+        </div>
     }
 }
 

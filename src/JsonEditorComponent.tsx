@@ -2,7 +2,11 @@ import React from 'react'
 // @ts-ignore
 import {JSONEditor} from '@json-editor/json-editor/dist/jsoneditor'
 
-class JsonEditorComponent extends React.Component<{ schema: any, data?: any }> {
+class JsonEditorComponent extends React.Component<{
+    schema: any,
+    data?: any,
+    onChange: (data: any) => void
+}> {
     private root: React.RefObject<HTMLDivElement>
     private editor: any
 
@@ -18,13 +22,21 @@ class JsonEditorComponent extends React.Component<{ schema: any, data?: any }> {
             theme: 'bootstrap5',
             iconlib: 'openiconic',
             schema: this.props.schema,
-            startval: this.props.data,
-            show_errors: 'change'
+            startval: this.props.data
+            //show_errors: 'change'
         })
         console.log(this.editor)
         this.editor.on('change', () => {
             console.log("validate")
             console.log(this.editor.validate())
+            let value = this.editor.getValue()
+            if (typeof value === 'object') {
+                value = {
+                    $schema: this.props.data['$schema'],
+                    ...value
+                }
+            }
+            this.props.onChange(value)
         })
     }
 
@@ -40,9 +52,11 @@ class JsonEditorComponent extends React.Component<{ schema: any, data?: any }> {
     }
 
     componentDidUpdate(prevProps: any) {
-        if (this.props.schema !== prevProps.schema) {
+        if (JSON.stringify(this.props.schema) !== JSON.stringify(prevProps.schema)) {
             this.destroyEditor()
             this.createEditor()
+        } else if (JSON.stringify(this.props.data) !== JSON.stringify(prevProps.data)) {
+            this.editor.setValue(this.props.data)
         }
     }
 
