@@ -1,8 +1,4 @@
 import React from 'react'
-import * as git from 'isomorphic-git'
-import {v4 as uuidv4} from "uuid"
-import SelectList from './SelectList'
-import {readDirRec} from './Utils'
 
 class Select extends React.Component<{
     items: string[],

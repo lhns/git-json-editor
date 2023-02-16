@@ -5,11 +5,10 @@ import ReactDOM from 'react-dom/client'
 import MainComponent from './MainComponent'
 
 import {Buffer} from 'buffer'
-// @ts-ignore
-globalThis.Buffer = Buffer
-
 import http from 'isomorphic-git/http/web'
 import LightningFS from '@isomorphic-git/lightning-fs';
+// @ts-ignore
+globalThis.Buffer = Buffer
 
 // @ts-ignore
 const fs = new LightningFS('fs', {wipe: true})
