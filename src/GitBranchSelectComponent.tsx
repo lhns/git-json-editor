@@ -38,8 +38,10 @@ class GitBranchSelectComponent extends React.Component<{
             corsProxy,
             noCheckout: true,
             //singleBranch: true,
-            //depth: 1,
-            onProgress: progress => this.setState(state => ({...state, progress: progress}))
+            depth: 1,
+            onProgress: progress => {
+                this.setState(state => ({...state, progress: progress}))
+            }
         })
             .then(() =>
                 git.listBranches({

@@ -15,6 +15,17 @@ class JsonEditorComponent extends React.Component<{
         this.root = React.createRef()
     }
 
+    private getValue(): string {
+        let value = this.editor.getValue()
+        if (typeof value === 'object') {
+            value = {
+                $schema: this.props.data['$schema'],
+                ...value
+            }
+        }
+        return value
+    }
+
     private createEditor() {
         const elem = document.createElement('div')
         this.root.current?.appendChild(elem)
@@ -28,13 +39,7 @@ class JsonEditorComponent extends React.Component<{
         this.editor.on('change', () => {
             //console.log("validate")
             //console.log(this.editor.validate())
-            let value = this.editor.getValue()
-            if (typeof value === 'object') {
-                value = {
-                    $schema: this.props.data['$schema'],
-                    ...value
-                }
-            }
+            const value = this.getValue()
             this.props.onChange(value)
         })
     }
@@ -54,7 +59,8 @@ class JsonEditorComponent extends React.Component<{
         if (JSON.stringify(this.props.schema) !== JSON.stringify(prevProps.schema)) {
             this.destroyEditor()
             this.createEditor()
-        } else if (JSON.stringify(this.props.data) !== JSON.stringify(prevProps.data)) {
+        } else if (JSON.stringify(this.props.data) !== JSON.stringify(prevProps.data) &&
+            JSON.stringify(this.props.data) !== JSON.stringify(this.getValue())) {
             this.editor.setValue(this.props.data)
         }
     }

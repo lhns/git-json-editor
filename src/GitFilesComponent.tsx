@@ -10,6 +10,7 @@ class GitFilesComponent extends React.Component<{
     branch: string,
     changes: [string, boolean][],
     onSelect: (file: string) => void,
+    onChange: (file: string) => void,
     onError: (error: Error) => void
 }, {
     files?: string[],
@@ -51,19 +52,41 @@ class GitFilesComponent extends React.Component<{
     componentWillUnmount() {
     }
 
+    private pathPrefix(): string {
+        const {repoDir} = this.props
+        return repoDir != null ? repoDir.replace(/\/?$/, '/') : ''
+    }
+
+    private revertFile(file: string) {
+        const {fs, repoDir, onChange} = this.props
+        const pathPrefix = this.pathPrefix()
+        git.checkout({
+            fs,
+            dir: repoDir,
+            force: true,
+            filepaths: [file.substring(pathPrefix.length)]
+        }).then(() => onChange(file))
+    }
+
     render() {
-        const {repoDir, changes, onSelect} = this.props
+        const {changes, onSelect} = this.props
         const {files, loading} = this.state || {}
-        const pathPrefix = repoDir != null ? repoDir.replace(/\/?$/, '/') : ''
+        const pathPrefix = this.pathPrefix()
         return loading ?
             <CenteredSpinner/> :
             <SelectList
                 items={files || []}
-                render={e => {
-                    const fileName = e.substring(pathPrefix.length)
-                    const changed = changes.some(([file]) => pathPrefix + file === e)
+                render={file => {
+                    const fileName = file.substring(pathPrefix.length)
+                    const changed = changes.some(([changedFile]) => pathPrefix + changedFile === file)
                     if (changed) {
-                        return <div className="fst-italic">{fileName} *</div>
+                        return <div className="fst-italic">
+                            {fileName} * <i className="revert-button oi oi-action-undo"
+                                            onClick={event => {
+                                                event.stopPropagation()
+                                                this.revertFile(file)
+                                            }}/>
+                        </div>
                     } else {
                         return <div>{fileName}</div>
                     }

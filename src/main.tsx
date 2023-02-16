@@ -11,11 +11,12 @@ import LightningFS from '@isomorphic-git/lightning-fs';
 globalThis.Buffer = Buffer
 
 // @ts-ignore
-const fs = new LightningFS('fs', {wipe: true})
+const fs = new LightningFS('fs', {wipe: false})
 
 const params = new URL(window.location.href).searchParams
 const url: string | null = params.get('url')
 const corsProxy: string | null = params.get('cors-proxy')
+const password: string | null = params.get('password')
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
     <React.StrictMode>{
@@ -28,10 +29,10 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
                 gitCloneOpts={{
                     http: http,
                     url: url,
-                    auth: {
+                    auth: password != null ? {
                         username: 'token', //oauth2
-                        password: ''
-                    },
+                        password: password
+                    } : undefined,
                     corsProxy: corsProxy || undefined
                 }}/>
     }</React.StrictMode>,

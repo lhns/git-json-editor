@@ -1,14 +1,26 @@
 html, body, #root {
-  height: 100%;
+    height: 100%;
 }
 
 .h-0 {
-  height: 0;
+    height: 0;
 }
 
 .je-switcher {
-  padding: 0 2.5em 0 .5em !important;
-  margin-bottom: .5em !important;
+    padding: 0 2.5em 0 .5em !important;
+    margin-bottom: .5em !important;
+}
+
+.revert-button {
+    float: right;
+    right: 5px;
+    top: 5px;
+    margin-bottom: 5px;
+    margin-left: 0.8em;
+}
+
+.revert-button:hover {
+    color: var(--bs-blue);
 }
 
 /*.btn-group>.btn-group:not(:first-child), .btn-group>.btn:not(:first-child) {

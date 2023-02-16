@@ -15,6 +15,7 @@ class GitRepoComponent extends React.Component<{
     repoDir: string,
     branch: string,
     changes?: [string, boolean][]
+    selectedFile?: string,
 }> {
     private getChanges() {
         const {fs, onError} = this.props
@@ -45,7 +46,7 @@ class GitRepoComponent extends React.Component<{
 
     render() {
         const {fs, gitCloneOpts, onSelect, onError} = this.props
-        const {repoDir, branch, changes} = this.state || {}
+        const {repoDir, branch, changes, selectedFile} = this.state || {}
         return <div className="h-100 d-flex flex-column p-1 gap-1">
             <GitBranchSelectComponent
                 fs={fs}
@@ -54,7 +55,8 @@ class GitRepoComponent extends React.Component<{
                     this.setState(state => ({
                         ...state,
                         repoDir: repoDir,
-                        branch: branch
+                        branch: branch,
+                        selectedFile: undefined
                     }))
                 }}
                 onError={onError}/>
@@ -68,6 +70,10 @@ class GitRepoComponent extends React.Component<{
                         onSelect={file => {
                             this.setState(state => ({...state, selectedFile: file}))
                             onSelect(file)
+                        }}
+                        onChange={() => {
+                            this.getChanges()
+                            if (selectedFile != null) onSelect(selectedFile)
                         }}
                         onError={onError}/>
                 </ScrollPane>

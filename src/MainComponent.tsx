@@ -50,7 +50,6 @@ class MainComponent extends React.Component<{
                                         schemaError: undefined
                                     }))
                                 }
-
                                 const data = JSON.parse(string)
                                 const schemaUrl = data['$schema']
                                 if (schemaUrl == null) {
@@ -85,8 +84,8 @@ class MainComponent extends React.Component<{
                                     schema={schema}
                                     data={data}
                                     onChange={data => {
+                                        this.setState(state => ({...state, data: data}))
                                         const string = JSON.stringify(data, null, 2)
-                                        //console.log(string)
                                         fs.promises.writeFile(
                                             selectedFile,
                                             string,
