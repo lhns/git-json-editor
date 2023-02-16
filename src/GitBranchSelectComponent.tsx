@@ -81,6 +81,7 @@ class GitBranchSelectComponent extends React.Component<{
         const loading = progress ? progress.phase + '...' : 'Loading...'
 
         return <Select
+            label="Branch"
             items={branches || [loading]}
             disabled={branches == null}
             selected={selected}

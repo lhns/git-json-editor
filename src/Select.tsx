@@ -1,9 +1,10 @@
 import React from 'react'
 
 class Select extends React.Component<{
+    label?: string,
     items: string[],
     selected?: string,
-    disabled?: Boolean,
+    disabled?: Boolean
     onSelect: (item: string) => void
 }, {
     selected: string
@@ -24,10 +25,11 @@ class Select extends React.Component<{
     }
 
     render() {
-        const {items, disabled, onSelect} = this.props
+        const {items, disabled, label, onSelect} = this.props
         const {selected} = this.state || {}
-        return <div>
-            <select className="form-select form-select-lg"
+        return <div className="input-group">
+            {label ? <span className="input-group-text">{label}</span> : null}
+            <select className="form-select"
                     value={selected}
                     disabled={disabled === true}
                     onChange={event => {

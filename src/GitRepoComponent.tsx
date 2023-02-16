@@ -8,15 +8,44 @@ import GitCommitDialog from "./GitCommitDialog";
 class GitRepoComponent extends React.Component<{
     fs: git.PromiseFsClient,
     gitCloneOpts: GitCloneOpts,
+    update?: any,
     onSelect: (file: string) => void,
     onError: (error: Error) => void
 }, {
     repoDir: string,
-    branch: string
+    branch: string,
+    changes?: [string, boolean][]
 }> {
+    private getChanges() {
+        const {fs, onError} = this.props
+        const {repoDir} = this.state || {}
+        this.setState(state => ({...state, changes: undefined}))
+        if (fs != null && repoDir != null) {
+            git.statusMatrix({
+                fs,
+                dir: repoDir
+            }).then(status => {
+                const changes: [string, boolean][] = status.flatMap(([file, , status]) =>
+                    status == 1 ? [] : [[file, status != 0]]
+                )
+                this.setState(state => ({...state, changes: changes}))
+            }).catch(onError)
+        }
+    }
+
+    componentDidMount() {
+        this.getChanges()
+    }
+
+    componentDidUpdate(prevProps: any) {
+        if (this.props.update !== prevProps.update) {
+            this.getChanges()
+        }
+    }
+
     render() {
         const {fs, gitCloneOpts, onSelect, onError} = this.props
-        const {repoDir, branch} = this.state || {}
+        const {repoDir, branch, changes} = this.state || {}
         return <div className="h-100 d-flex flex-column p-1 gap-1">
             <GitBranchSelectComponent
                 fs={fs}
@@ -35,6 +64,7 @@ class GitRepoComponent extends React.Component<{
                         fs={fs}
                         repoDir={repoDir}
                         branch={branch}
+                        changes={changes || []}
                         onSelect={file => {
                             this.setState(state => ({...state, selectedFile: file}))
                             onSelect(file)
@@ -48,7 +78,8 @@ class GitRepoComponent extends React.Component<{
                     gitCloneOpts={gitCloneOpts}
                     branch={branch}
                     repoDir={repoDir}
-                    onCommit={message => console.log(message)}
+                    changes={changes || []}
+                    onCommit={() => this.getChanges()}
                     onError={onError}/>
             </div>
         </div>

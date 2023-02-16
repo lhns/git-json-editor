@@ -1,18 +1,20 @@
 import React from 'react'
 
-class CommitDialog extends React.Component<{
+class InputDialog extends React.Component<{
+    action: string,
+    placeholder?: string
     disabled?: boolean,
-    onCommit: (message: string) => void
+    onConfirm: (message: string) => void
 }, {
     message: string
 }> {
     render() {
-        const {disabled, onCommit} = this.props
+        const {action, placeholder, disabled, onConfirm} = this.props
         const {message} = this.state || {}
         return <div className="d-flex flex-column gap-1">
             <input type="text"
                    className="form-control"
-                   placeholder="Commit Message"
+                   placeholder={placeholder}
                    disabled={disabled}
                    value={message || ''}
                    onChange={event => {
@@ -21,17 +23,15 @@ class CommitDialog extends React.Component<{
                    }}
                    onKeyDown={event => {
                        if (event.key === 'Enter') {
-                           onCommit(message)
+                           onConfirm(message)
                        }
                    }}/>
             <button type="button"
                     className="btn btn-primary"
                     disabled={disabled}
-                    onClick={() => onCommit(message)}>
-                Commit
-            </button>
+                    onClick={() => onConfirm(message)}>{action}</button>
         </div>
     }
 }
 
-export default CommitDialog
+export default InputDialog

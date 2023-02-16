@@ -8,6 +8,7 @@ class GitFilesComponent extends React.Component<{
     fs: git.PromiseFsClient,
     repoDir: string,
     branch: string,
+    changes: [string, boolean][],
     onSelect: (file: string) => void,
     onError: (error: Error) => void
 }, {
@@ -41,7 +42,8 @@ class GitFilesComponent extends React.Component<{
     }
 
     componentDidUpdate(prevProps: any) {
-        if (JSON.stringify(this.props) !== JSON.stringify(prevProps)) {
+        const {fs, repoDir, branch} = this.props
+        if (fs !== prevProps.fs || repoDir !== prevProps.repoDir || branch !== prevProps.branch) {
             this.checkout()
         }
     }
@@ -50,16 +52,23 @@ class GitFilesComponent extends React.Component<{
     }
 
     render() {
-        const {repoDir, onSelect} = this.props
+        const {repoDir, changes, onSelect} = this.props
         const {files, loading} = this.state || {}
-        const pathPrefixLength = repoDir != null ? repoDir.replace(/\/?$/, '/').length : 0
+        const pathPrefix = repoDir != null ? repoDir.replace(/\/?$/, '/') : ''
         return loading ?
             <CenteredSpinner/> :
             <SelectList
                 items={files || []}
-                render={e => e.substring(pathPrefixLength)}
+                render={e => {
+                    const fileName = e.substring(pathPrefix.length)
+                    const changed = changes.some(([file]) => pathPrefix + file === e)
+                    if (changed) {
+                        return <div className="fst-italic">{fileName} *</div>
+                    } else {
+                        return <div>{fileName}</div>
+                    }
+                }}
                 onSelect={onSelect}/>
-
     }
 }
 
