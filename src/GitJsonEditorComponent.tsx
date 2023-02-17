@@ -36,7 +36,6 @@ class GitJsonEditorComponent extends React.Component<{
                         gitOpts={gitOpts}
                         update={update}
                         onSelect={file => {
-                            this.setState(state => ({...state, selectedFile: file}))
                             const fileContent: Promise<string> = fs.promises.readFile(
                                 file,
                                 {encoding: 'utf8'}
@@ -46,15 +45,16 @@ class GitJsonEditorComponent extends React.Component<{
                             ).then(({schema, data}) => {
                                 this.setState((state) => ({
                                     ...state,
+                                    selectedFile: data != null ? file : undefined,
                                     schema,
                                     data,
-                                    selectedFile: data != null ? state.selectedFile : undefined,
                                     schemaError: undefined
                                 }))
                             }).catch((error: Error) => {
                                 console.error(error)
                                 this.setState((state) => ({
                                     ...state,
+                                    selectedFile: undefined,
                                     schema: undefined,
                                     data: undefined,
                                     schemaError: error.message
@@ -74,7 +74,7 @@ class GitJsonEditorComponent extends React.Component<{
                                 <JsonEditorComponent
                                     schema={schema}
                                     data={data}
-                                    onChange={data => {
+                                    onChange={(data: any) => {
                                         this.setState(state => ({...state, data: data}))
                                         if (selectedFile != null) {
                                             const string = JSON.stringify(data, null, 2)

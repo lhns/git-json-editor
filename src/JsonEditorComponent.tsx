@@ -2,79 +2,69 @@ import React from 'react'
 // @ts-ignore
 import {JSONEditor} from '@json-editor/json-editor/dist/jsoneditor'
 
-class JsonEditorComponent extends React.Component<{
+class InternalJsonEditorComponent extends React.Component<{
     schema: any,
     data?: any,
     onChange: (data: any) => void
-}, {
-    editor: any
 }> {
     private root: React.RefObject<HTMLDivElement>
+    private editor: any
 
     constructor(props: any) {
         super(props)
         this.root = React.createRef()
+        this.state = {data: props.data}
     }
 
-    private getValue(editor: any): string {
-        let value = editor?.getValue()
-        if (typeof value === 'object' && this.props.data != null) {
+    private getValue(editor: any, data?: any): string {
+        let value = editor.getValue()
+        if (typeof value === 'object' && data?.$schema != null) {
             value = {
-                $schema: this.props.data['$schema'],
+                $schema: data.$schema,
                 ...value
             }
         }
         return value
     }
 
-    private createEditor() {
+    componentDidMount() {
+        const {schema, data: initialData} = this.props
         const elem = document.createElement('div')
         this.root.current?.appendChild(elem)
         const editor = new JSONEditor(elem, {
             theme: 'bootstrap5',
             iconlib: 'openiconic',
-            schema: this.props.schema,
-            startval: this.props.data
-            //show_errors: 'change'
+            schema: schema,
+            startval: initialData
         })
         editor.on('change', () => {
-            //console.log("validate")
-            //console.log(this.editor.validate())
-            const value = this.getValue(editor)
-            this.props.onChange(value)
+            const data = this.getValue(editor, initialData)
+            this.props.onChange(data)
         })
-        this.setState(state => ({...state, editor}))
-    }
-
-    private destroyEditor() {
-        const {editor} = this.state || {}
-        editor?.promise.then(() => {
-            editor.destroy()
-        })
-        this.setState(state => ({...state, editor: undefined}))
-    }
-
-    componentDidMount() {
-        this.createEditor()
-    }
-
-    componentDidUpdate(prevProps: any) {
-        const {editor} = this.state || {}
-        if (JSON.stringify(this.props.schema) !== JSON.stringify(prevProps.schema)) {
-            this.destroyEditor()
-            this.createEditor()
-        } else if (JSON.stringify(this.props.data) !== JSON.stringify(prevProps.data) &&
-            JSON.stringify(this.props.data) !== JSON.stringify(this.getValue(editor))) {
-            editor.setValue(this.props.data)
-        }
+        this.editor = editor
     }
 
     componentWillUnmount() {
-        this.destroyEditor()
+        this.editor.promise.then(() => this.editor.destroy())
     }
 
     render() {
         return <div ref={this.root}/>
+    }
+}
+
+class JsonEditorComponent extends React.Component<{
+    schema: any,
+    data?: any,
+    onChange: (data: any) => void
+}> {
+    render() {
+        const {schema, data, onChange} = this.props
+        return <InternalJsonEditorComponent
+            key={JSON.stringify([schema, data])}
+            schema={schema}
+            data={data}
+            onChange={onChange}/>
     }
 }
 
