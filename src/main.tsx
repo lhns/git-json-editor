@@ -2,11 +2,11 @@ import './style.css'
 
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import MainComponent from './MainComponent'
 
 import {Buffer} from 'buffer'
 import http from 'isomorphic-git/http/web'
 import LightningFS from '@isomorphic-git/lightning-fs';
+import MainComponent from "./MainComponent";
 // @ts-ignore
 globalThis.Buffer = Buffer
 
@@ -16,7 +16,6 @@ const fs = new LightningFS('fs', {wipe: false})
 const params = new URL(window.location.href).searchParams
 const url: string | null = params.get('url')
 const corsProxy: string | null = params.get('cors-proxy')
-const password: string | null = params.get('password')
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
     <React.StrictMode>{
@@ -26,14 +25,12 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
             </div> :
             <MainComponent
                 fs={fs}
-                gitCloneOpts={{
+                gitOpts={{
                     http: http,
                     url: url,
-                    auth: password != null ? {
-                        username: 'token', //oauth2
-                        password: password
-                    } : undefined,
                     corsProxy: corsProxy || undefined
-                }}/>
+                }}
+                client_id=""
+                redirect_origin=""/>
     }</React.StrictMode>,
 )

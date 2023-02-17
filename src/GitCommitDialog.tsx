@@ -1,22 +1,33 @@
 import React from 'react'
 import * as git from 'isomorphic-git'
-import InputDialog from "./InputDialog";
-import {GitCloneOpts} from "./GitBranchSelectComponent";
+import InputDialog from "./html/InputDialog";
+import {GitOpts} from "./GitBranchSelectComponent";
 
 class GitCommitDialog extends React.Component<{
     fs: git.PromiseFsClient,
-    gitCloneOpts: GitCloneOpts,
+    gitOpts: GitOpts,
     repoDir: string,
     branch: string,
     changes: [string, boolean][],
     onCommit: (message: string) => void,
+    onAuthFailure: (url: string) => void,
     onError: (error: Error) => void
 }, {
     disabled: boolean
 }> {
     render() {
-        const {fs, gitCloneOpts: {http, auth}, repoDir, branch, changes, onCommit, onError} = this.props
+        const {
+            fs,
+            gitOpts: {http, author, onAuth},
+            repoDir,
+            branch,
+            changes,
+            onCommit,
+            onAuthFailure,
+            onError
+        } = this.props
         const {disabled} = this.state || {}
+
         return <InputDialog
             action={`Commit (${changes.length})`}
             placeholder="Commit Message"
@@ -33,10 +44,7 @@ class GitCommitDialog extends React.Component<{
                     git.commit({
                         fs,
                         dir: repoDir,
-                        author: {
-                            name: 'Test',
-                            email: 'test@example.com',
-                        },
+                        author,
                         message: message
                     })
                 ).then(() =>
@@ -46,10 +54,8 @@ class GitCommitDialog extends React.Component<{
                         dir: repoDir,
                         remote: 'origin',
                         ref: branch,
-                        onAuth: () => auth,
-                        onAuthFailure: (url) => {
-                            console.warn("git: failed to authenticate: " + url)
-                        },
+                        onAuth,
+                        onAuthFailure,
                     })
                 ).then(() => {
                     onCommit(message)

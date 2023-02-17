@@ -29,4 +29,18 @@ function isMetaSchemaUrl(schemaUrl: string): boolean {
     return /^https?:\/\/json-schema.org\/.*\/schema#?$/.test(schemaUrl)
 }
 
-export {readDirRec, withCorsProxy, isMetaSchemaUrl}
+function loadSchema(string: string, corsProxy?: string): Promise<{schema: any, data?: any}> {
+    const data = JSON.parse(string)
+    const schemaUrl = data['$schema']
+    if (schemaUrl == null) {
+        throw new Error('$schema is not defined')
+    } else if (isMetaSchemaUrl(schemaUrl)) {
+        return Promise.resolve({schema: data, data: undefined})
+    } else {
+        return fetch(withCorsProxy(schemaUrl, corsProxy))
+            .then((response: Response) => response.json())
+            .then((schema: any) => ({schema, data}))
+    }
+}
+
+export {readDirRec, withCorsProxy, isMetaSchemaUrl, loadSchema}

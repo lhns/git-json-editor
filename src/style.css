@@ -6,9 +6,9 @@ html, body, #root {
     height: 0;
 }
 
-.je-switcher {
-    padding: 0 2.5em 0 .5em !important;
-    margin-bottom: .5em !important;
+.git-panel {
+    width: 18em;
+    border-right: 1px solid var(--bs-gray-400);
 }
 
 .revert-button {
@@ -21,6 +21,11 @@ html, body, #root {
 
 .revert-button:hover {
     color: var(--bs-blue);
+}
+
+.je-switcher {
+    padding: 0 2.5em 0 .5em !important;
+    margin-bottom: .5em !important;
 }
 
 /*.btn-group>.btn-group:not(:first-child), .btn-group>.btn:not(:first-child) {

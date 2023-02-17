@@ -1,8 +1,8 @@
 import React from 'react'
 import * as git from 'isomorphic-git'
-import SelectList from './SelectList'
+import SelectList from './html/SelectList'
 import {readDirRec} from './Utils'
-import CenteredSpinner from "./CenteredSpinner";
+import CenteredSpinner from "./html/CenteredSpinner";
 
 class GitFilesComponent extends React.Component<{
     fs: git.PromiseFsClient,
@@ -71,6 +71,7 @@ class GitFilesComponent extends React.Component<{
     render() {
         const {changes, onSelect} = this.props
         const {files, loading} = this.state || {}
+
         const pathPrefix = this.pathPrefix()
         return loading ?
             <CenteredSpinner/> :

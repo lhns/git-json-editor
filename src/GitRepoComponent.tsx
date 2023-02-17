@@ -1,15 +1,16 @@
 import React from 'react'
 import * as git from 'isomorphic-git'
-import ScrollPane from "./ScrollPane";
+import ScrollPane from "./html/ScrollPane";
 import GitFilesComponent from "./GitFilesComponent";
-import GitBranchSelectComponent, {GitCloneOpts} from "./GitBranchSelectComponent";
+import GitBranchSelectComponent, {GitOpts} from "./GitBranchSelectComponent";
 import GitCommitDialog from "./GitCommitDialog";
 
 class GitRepoComponent extends React.Component<{
     fs: git.PromiseFsClient,
-    gitCloneOpts: GitCloneOpts,
+    gitOpts: GitOpts,
     update?: any,
     onSelect: (file: string) => void,
+    onAuthFailure: (url: string) => void,
     onError: (error: Error) => void
 }, {
     repoDir: string,
@@ -45,12 +46,13 @@ class GitRepoComponent extends React.Component<{
     }
 
     render() {
-        const {fs, gitCloneOpts, onSelect, onError} = this.props
+        const {fs, gitOpts, onSelect, onAuthFailure, onError} = this.props
         const {repoDir, branch, changes, selectedFile} = this.state || {}
+
         return <div className="h-100 d-flex flex-column p-1 gap-1">
             <GitBranchSelectComponent
                 fs={fs}
-                gitCloneOpts={gitCloneOpts}
+                gitOpts={gitOpts}
                 onSelect={(branch, repoDir) => {
                     this.setState(state => ({
                         ...state,
@@ -59,6 +61,7 @@ class GitRepoComponent extends React.Component<{
                         selectedFile: undefined
                     }))
                 }}
+                onAuthFailure={onAuthFailure}
                 onError={onError}/>
             <div className="flex-fill d-flex flex-column">
                 <ScrollPane>
@@ -81,11 +84,12 @@ class GitRepoComponent extends React.Component<{
             <div>
                 <GitCommitDialog
                     fs={fs}
-                    gitCloneOpts={gitCloneOpts}
+                    gitOpts={gitOpts}
                     branch={branch}
                     repoDir={repoDir}
                     changes={changes || []}
                     onCommit={() => this.getChanges()}
+                    onAuthFailure={onAuthFailure}
                     onError={onError}/>
             </div>
         </div>

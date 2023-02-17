@@ -1,20 +1,22 @@
 import React from 'react'
 import * as git from 'isomorphic-git'
-import {GitProgressEvent} from 'isomorphic-git'
+import {AuthCallback, GitProgressEvent} from 'isomorphic-git'
 import {v4 as uuidv4} from "uuid"
-import Select from "./Select";
+import Select from "./html/Select";
 
-type GitCloneOpts = {
+type GitOpts = {
     http: git.HttpClient,
     url: string,
-    auth?: { username: string, password: string },
-    corsProxy?: string
+    corsProxy?: string,
+    author?: { name: string, email: string },
+    onAuth?: AuthCallback
 }
 
 class GitBranchSelectComponent extends React.Component<{
     fs: git.PromiseFsClient,
-    gitCloneOpts: GitCloneOpts,
+    gitOpts: GitOpts,
     onSelect: (branch: string, repoDir: string) => void,
+    onAuthFailure: (url: string) => void,
     onError: (error: Error) => void
 }, {
     progress: GitProgressEvent,
@@ -23,7 +25,8 @@ class GitBranchSelectComponent extends React.Component<{
     selected: string
 }> {
     private cloneRepo() {
-        const {fs, gitCloneOpts: {http, url, auth, corsProxy}, onSelect, onError} = this.props
+        const {fs, gitOpts: {http, url, corsProxy, onAuth}, onSelect, onAuthFailure, onError} = this.props
+
         const repoDir = '/' + uuidv4()
         this.setState(() => ({}))
         git.clone({
@@ -31,10 +34,8 @@ class GitBranchSelectComponent extends React.Component<{
             http,
             dir: repoDir,
             url,
-            onAuth: () => auth,
-            onAuthFailure: (url) => {
-                console.warn("git: failed to authenticate: " + url)
-            },
+            onAuth,
+            onAuthFailure,
             corsProxy,
             noCheckout: true,
             //singleBranch: true,
@@ -95,4 +96,4 @@ class GitBranchSelectComponent extends React.Component<{
 }
 
 export default GitBranchSelectComponent
-export type {GitCloneOpts}
+export type {GitOpts}
