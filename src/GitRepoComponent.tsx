@@ -4,19 +4,23 @@ import ScrollPane from "./html/ScrollPane";
 import GitFilesComponent from "./GitFilesComponent";
 import GitBranchSelectComponent, {GitOpts} from "./GitBranchSelectComponent";
 import GitCommitDialog from "./GitCommitDialog";
+import {resolvePath} from "./Utils";
 
 class GitRepoComponent extends React.Component<{
     fs: git.PromiseFsClient,
     gitOpts: GitOpts,
     update?: any,
-    onSelect: (file: string) => void,
+    initialBranch?: string,
+    initialFile?: string,
+    onSelect: (filePath: string, repoDir: string) => void,
+    onBranchSelect?: (branch: string) => void,
     onAuthFailure: (url: string) => void,
     onError: (error: Error) => void
 }, {
     repoDir: string,
     branch: string,
     changes?: [string, boolean][]
-    selectedFile?: string,
+    selectedFilePath?: string,
 }> {
     private getChanges() {
         const {fs, onError} = this.props
@@ -46,8 +50,8 @@ class GitRepoComponent extends React.Component<{
     }
 
     render() {
-        const {fs, gitOpts, onSelect, onAuthFailure, onError} = this.props
-        const {repoDir, branch, changes, selectedFile} = this.state || {}
+        const {fs, gitOpts, initialBranch, initialFile, onSelect, onBranchSelect, onAuthFailure, onError} = this.props
+        const {repoDir, branch, changes, selectedFilePath} = this.state || {}
 
         return <div className="h-100 d-flex flex-column gap-1">
             <div className="git-repo-title">
@@ -57,12 +61,16 @@ class GitRepoComponent extends React.Component<{
                 <GitBranchSelectComponent
                     fs={fs}
                     gitOpts={gitOpts}
+                    initialBranch={initialBranch}
                     onSelect={(branch, repoDir) => {
+                        if (onBranchSelect != null) {
+                            onBranchSelect(branch)
+                        }
                         this.setState(state => ({
                             ...state,
                             repoDir: repoDir,
                             branch: branch,
-                            selectedFile: undefined
+                            selectedFilePath: undefined
                         }))
                     }}
                     onAuthFailure={onAuthFailure}
@@ -75,13 +83,16 @@ class GitRepoComponent extends React.Component<{
                         repoDir={repoDir}
                         branch={branch}
                         changes={changes || []}
+                        initialFilePath={selectedFilePath || (initialFile != null ? resolvePath(repoDir, initialFile) : undefined)}
                         onSelect={file => {
-                            this.setState(state => ({...state, selectedFile: file}))
-                            onSelect(file)
+                            this.setState(state => ({...state, selectedFilePath: file}))
+                            onSelect(file, repoDir)
                         }}
                         onChange={() => {
                             this.getChanges()
-                            if (selectedFile != null) onSelect(selectedFile)
+                            if (selectedFilePath != null) {
+                                onSelect(selectedFilePath, repoDir)
+                            }
                         }}
                         onError={onError}/>
                 </ScrollPane>

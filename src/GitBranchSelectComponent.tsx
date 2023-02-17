@@ -15,6 +15,7 @@ type GitOpts = {
 class GitBranchSelectComponent extends React.Component<{
     fs: git.PromiseFsClient,
     gitOpts: GitOpts,
+    initialBranch?: string,
     onSelect: (branch: string, repoDir: string) => void,
     onAuthFailure: (url: string) => void,
     onError: (error: Error) => void
@@ -25,7 +26,14 @@ class GitBranchSelectComponent extends React.Component<{
     selected: string
 }> {
     private cloneRepo() {
-        const {fs, gitOpts: {http, url, corsProxy, onAuth}, onSelect, onAuthFailure, onError} = this.props
+        const {
+            fs,
+            gitOpts: {http, url, corsProxy, onAuth},
+            initialBranch,
+            onSelect,
+            onAuthFailure,
+            onError
+        } = this.props
 
         const repoDir = '/' + uuidv4()
         this.setState(() => ({}))
@@ -53,14 +61,16 @@ class GitBranchSelectComponent extends React.Component<{
             )
             .then(branches => {
                 const filteredBranches = branches.filter(e => e !== 'HEAD')
-                const initialBranch = filteredBranches[0]
+                const selected = initialBranch != null && filteredBranches.includes(initialBranch) ?
+                    initialBranch :
+                    filteredBranches[0]
                 this.setState(state => ({
                     ...state,
                     repoDir: repoDir,
                     branches: filteredBranches,
-                    selected: initialBranch
+                    selected: selected
                 }))
-                onSelect(initialBranch, repoDir)
+                onSelect(selected, repoDir)
             })
             .catch(onError)
     }
@@ -70,7 +80,8 @@ class GitBranchSelectComponent extends React.Component<{
     }
 
     componentDidUpdate(prevProps: any) {
-        if (JSON.stringify(this.props) !== JSON.stringify(prevProps)) {
+        const {fs, gitOpts} = this.props
+        if (JSON.stringify([fs, gitOpts]) !== JSON.stringify([prevProps.fs, prevProps.gitOpts])) {
             this.cloneRepo()
         }
     }

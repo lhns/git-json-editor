@@ -3,13 +3,30 @@ import React from 'react'
 class SelectList extends React.Component<{
     items: string[],
     render: (item: string) => React.ReactNode
+    selected?: string,
     onSelect: (item: string) => void
 }, {
     selected: string
 }> {
+    constructor(props: any) {
+        super(props)
+
+        this.state = {
+            selected: props.selected
+        }
+    }
+
+    componentDidUpdate(prevProps: any) {
+        const {selected} = this.props
+        if (selected != null && selected !== prevProps.selected) {
+            this.setState(state => ({...state, selected: selected}))
+        }
+    }
+
     render() {
         const {items, render, onSelect} = this.props
         const {selected} = this.state || {}
+
         return <table className="table table-sm table-hover">
             <tbody>
             {items.map(item => {

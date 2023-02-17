@@ -1,7 +1,7 @@
 import React from 'react'
 import GitRepoComponent from './GitRepoComponent'
 import JsonEditorComponent from "./JsonEditorComponent"
-import {loadSchema} from "./Utils";
+import {loadSchema, relativePath} from "./Utils";
 import ScrollPane from "./html/ScrollPane";
 import * as git from "isomorphic-git";
 import {GitOpts} from "./GitBranchSelectComponent";
@@ -22,6 +22,10 @@ class GitJsonEditorComponent extends React.Component<{
         const {fs, gitOpts} = this.props
         const {selectedFile, schema, data, update, schemaError, globalError} = this.state || {}
 
+        const params = new URL(window.location.href).searchParams
+        const initialBranch: string | null = params.get('branch')
+        const initialFile: string | null = params.get('file')
+
         if (globalError != null) {
             return <div className="p-3">
                 <Alert>
@@ -35,7 +39,13 @@ class GitJsonEditorComponent extends React.Component<{
                         fs={fs}
                         gitOpts={gitOpts}
                         update={update}
-                        onSelect={file => {
+                        initialBranch={initialBranch || undefined}
+                        initialFile={initialFile || undefined}
+                        onSelect={(file, repoDir) => {
+                            const newUrl = new URL(window.location.href)
+                            newUrl.searchParams.set('file', relativePath(file, repoDir))
+                            window.history.replaceState(null, document.title, newUrl.href)
+
                             const fileContent: Promise<string> = fs.promises.readFile(
                                 file,
                                 {encoding: 'utf8'}
@@ -61,6 +71,11 @@ class GitJsonEditorComponent extends React.Component<{
                                 }))
                             })
                         }}
+                        onBranchSelect={branch => {
+                            const newUrl = new URL(window.location.href)
+                            newUrl.searchParams.set('branch', branch)
+                            window.history.replaceState(null, document.title, newUrl.href)
+                        }}
                         onAuthFailure={url => console.warn("git: failed to authenticate: " + url)}
                         onError={error => {
                             console.error(error)
@@ -75,7 +90,7 @@ class GitJsonEditorComponent extends React.Component<{
                                     schema={schema}
                                     data={data}
                                     onChange={(data: any) => {
-                                        this.setState(state => ({...state, data: data}))
+                                        //this.setState(state => ({...state, data: data}))
                                         if (selectedFile != null) {
                                             const string = JSON.stringify(data, null, 2)
                                             fs.promises.writeFile(

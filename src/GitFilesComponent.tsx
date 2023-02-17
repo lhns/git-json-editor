@@ -1,7 +1,7 @@
 import React from 'react'
 import * as git from 'isomorphic-git'
 import SelectList from './html/SelectList'
-import {readDirRec} from './Utils'
+import {readDirRec, relativePath} from './Utils'
 import CenteredSpinner from "./html/CenteredSpinner";
 
 class GitFilesComponent extends React.Component<{
@@ -9,15 +9,18 @@ class GitFilesComponent extends React.Component<{
     repoDir: string,
     branch: string,
     changes: [string, boolean][],
+    initialFilePath?: string,
     onSelect: (file: string) => void,
     onChange: (file: string) => void,
     onError: (error: Error) => void
 }, {
     files?: string[],
+    selected?: string,
     loading: boolean
 }> {
     private checkout() {
-        const {fs, repoDir, branch, onError} = this.props
+        const {fs, repoDir, branch, initialFilePath, onSelect, onError} = this.props
+
         this.setState(() => ({}))
         if (fs != null && repoDir != null && branch != null) {
             this.setState(state => ({...state, loading: true}))
@@ -32,7 +35,14 @@ class GitFilesComponent extends React.Component<{
                     const files = paths
                         .filter(e => !e.endsWith('/'))
                         .sort((a, b) => a.localeCompare(b))
-                    this.setState(state => ({...state, files: files, loading: false}))
+                    const selected = initialFilePath != null && files.includes(initialFilePath) ?
+                        initialFilePath :
+                        undefined
+                    this.setState(state => ({...state, files: files, selected, loading: false}), () => {
+                        if (selected != null) {
+                            onSelect(selected)
+                        }
+                    })
                 })
                 .catch(onError)
         }
@@ -44,55 +54,51 @@ class GitFilesComponent extends React.Component<{
 
     componentDidUpdate(prevProps: any) {
         const {fs, repoDir, branch} = this.props
+
         if (fs !== prevProps.fs || repoDir !== prevProps.repoDir || branch !== prevProps.branch) {
             this.checkout()
         }
     }
 
-    componentWillUnmount() {
-    }
-
-    private pathPrefix(): string {
-        const {repoDir} = this.props
-        return repoDir != null ? repoDir.replace(/\/?$/, '/') : ''
-    }
-
     private revertFile(file: string) {
         const {fs, repoDir, onChange} = this.props
-        const pathPrefix = this.pathPrefix()
+
         git.checkout({
             fs,
             dir: repoDir,
             force: true,
-            filepaths: [file.substring(pathPrefix.length)]
+            filepaths: [relativePath(file, repoDir)]
         }).then(() => onChange(file))
     }
 
     render() {
-        const {changes, onSelect} = this.props
-        const {files, loading} = this.state || {}
+        const {repoDir, changes, onSelect} = this.props
+        const {files, selected, loading} = this.state || {}
 
-        const pathPrefix = this.pathPrefix()
         return loading ?
             <CenteredSpinner/> :
             <SelectList
                 items={files || []}
-                render={file => {
-                    const fileName = file.substring(pathPrefix.length)
-                    const changed = changes.some(([changedFile]) => pathPrefix + changedFile === file)
+                selected={selected}
+                render={filePath => {
+                    const file = relativePath(filePath, repoDir)
+                    const changed = changes.some(([changedFile]) => changedFile === file)
                     if (changed) {
                         return <div className="fst-italic">
-                            {fileName} * <i className="revert-button oi oi-action-undo"
-                                            onClick={event => {
-                                                event.stopPropagation()
-                                                this.revertFile(file)
-                                            }}/>
+                            {file} * <i className="revert-button oi oi-action-undo"
+                                        onClick={event => {
+                                            event.stopPropagation()
+                                            this.revertFile(filePath)
+                                        }}/>
                         </div>
                     } else {
-                        return <div>{fileName}</div>
+                        return <div>{file}</div>
                     }
                 }}
-                onSelect={onSelect}/>
+                onSelect={filePath => {
+                    this.setState(state => ({...state, selected: filePath}))
+                    onSelect(filePath)
+                }}/>
     }
 }
 

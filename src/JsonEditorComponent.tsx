@@ -13,7 +13,6 @@ class InternalJsonEditorComponent extends React.Component<{
     constructor(props: any) {
         super(props)
         this.root = React.createRef()
-        this.state = {data: props.data}
     }
 
     private getValue(editor: any, data?: any): string {
@@ -37,15 +36,33 @@ class InternalJsonEditorComponent extends React.Component<{
             schema: schema,
             startval: initialData
         })
+        editor.ignoreInitialChange = true
         editor.on('change', () => {
-            const data = this.getValue(editor, initialData)
-            this.props.onChange(data)
+            if (editor.ignoreInitialChange) {
+                editor.ignoreInitialChange = false
+            } else {
+                console.log('change')
+                const data = this.getValue(editor, initialData)
+                this.props.onChange(data)
+            }
         })
         this.editor = editor
     }
 
     componentWillUnmount() {
-        this.editor.promise.then(() => this.editor.destroy())
+        const editor = this.editor
+        editor.promise.then(() => editor.destroy())
+    }
+
+    componentDidUpdate(prevProps: any) {
+        const {data} = this.props
+        if (JSON.stringify(data) !== JSON.stringify(prevProps.data)) {
+            const editor = this.editor
+            editor.promise.then(() => {
+                editor.ignoreInitialChange = true
+                editor.setValue(data)
+            })
+        }
     }
 
     render() {
@@ -61,7 +78,7 @@ class JsonEditorComponent extends React.Component<{
     render() {
         const {schema, data, onChange} = this.props
         return <InternalJsonEditorComponent
-            key={JSON.stringify([schema, data])}
+            key={JSON.stringify([schema, data?.$schema])}
             schema={schema}
             data={data}
             onChange={onChange}/>

@@ -1,5 +1,22 @@
 import * as git from "isomorphic-git";
 
+function dirPath(path: string): string {
+    return path.replace(/\/?$/, '/')
+}
+
+function resolvePath(parent: string | null, child: string): string {
+    return (parent != null ? dirPath(parent) : '') + child
+}
+
+function relativePath(path: string, parent: string | null): string {
+    const prefix = (parent != null ? dirPath(parent) : '')
+    if (path.startsWith(prefix)) {
+        return path.substring(prefix.length)
+    } else {
+        return path
+    }
+}
+
 function readDirRec(fs: git.PromiseFsClient, path: string, hidden: boolean = false): Promise<string[]> {
     return fs.promises.lstat(path).then((stat: { type: string }) => {
         if (stat.type === 'dir') {
@@ -29,7 +46,7 @@ function isMetaSchemaUrl(schemaUrl: string): boolean {
     return /^https?:\/\/json-schema.org\/.*\/schema#?$/.test(schemaUrl)
 }
 
-function loadSchema(string: string, corsProxy?: string): Promise<{schema: any, data?: any}> {
+function loadSchema(string: string, corsProxy?: string): Promise<{ schema: any, data?: any }> {
     const data = JSON.parse(string)
     const schemaUrl = data['$schema']
     if (schemaUrl == null) {
@@ -43,4 +60,4 @@ function loadSchema(string: string, corsProxy?: string): Promise<{schema: any, d
     }
 }
 
-export {readDirRec, withCorsProxy, isMetaSchemaUrl, loadSchema}
+export {resolvePath, relativePath, readDirRec, withCorsProxy, isMetaSchemaUrl, loadSchema}

@@ -27,6 +27,7 @@ class Select extends React.Component<{
     render() {
         const {items, disabled, label, onSelect} = this.props
         const {selected} = this.state || {}
+
         return <div className="input-group">
             {label ? <span className="input-group-text">{label}</span> : null}
             <select className="form-select"
