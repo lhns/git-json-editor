@@ -49,21 +49,26 @@ class GitRepoComponent extends React.Component<{
         const {fs, gitOpts, onSelect, onAuthFailure, onError} = this.props
         const {repoDir, branch, changes, selectedFile} = this.state || {}
 
-        return <div className="h-100 d-flex flex-column p-1 gap-1">
-            <GitBranchSelectComponent
-                fs={fs}
-                gitOpts={gitOpts}
-                onSelect={(branch, repoDir) => {
-                    this.setState(state => ({
-                        ...state,
-                        repoDir: repoDir,
-                        branch: branch,
-                        selectedFile: undefined
-                    }))
-                }}
-                onAuthFailure={onAuthFailure}
-                onError={onError}/>
-            <div className="flex-fill d-flex flex-column">
+        return <div className="h-100 d-flex flex-column gap-1">
+            <div className="git-repo-title">
+                <a href={gitOpts.url}>{gitOpts.url}</a>
+            </div>
+            <div className="px-1">
+                <GitBranchSelectComponent
+                    fs={fs}
+                    gitOpts={gitOpts}
+                    onSelect={(branch, repoDir) => {
+                        this.setState(state => ({
+                            ...state,
+                            repoDir: repoDir,
+                            branch: branch,
+                            selectedFile: undefined
+                        }))
+                    }}
+                    onAuthFailure={onAuthFailure}
+                    onError={onError}/>
+            </div>
+            <div className="flex-fill d-flex flex-column px-1">
                 <ScrollPane>
                     <GitFilesComponent
                         fs={fs}
@@ -81,7 +86,7 @@ class GitRepoComponent extends React.Component<{
                         onError={onError}/>
                 </ScrollPane>
             </div>
-            <div>
+            <div className="px-1 pb-1">
                 <GitCommitDialog
                     fs={fs}
                     gitOpts={gitOpts}

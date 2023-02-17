@@ -1,6 +1,6 @@
 import React from 'react'
 import * as git from 'isomorphic-git'
-import InputDialog from "./html/InputDialog";
+import SubmitTextDialog from "./html/SubmitTextDialog";
 import {GitOpts} from "./GitBranchSelectComponent";
 
 class GitCommitDialog extends React.Component<{
@@ -28,7 +28,7 @@ class GitCommitDialog extends React.Component<{
         } = this.props
         const {disabled} = this.state || {}
 
-        return <InputDialog
+        return <SubmitTextDialog
             action={`Commit (${changes.length})`}
             placeholder="Commit Message"
             disabled={disabled || changes.length == 0}

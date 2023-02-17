@@ -62,7 +62,7 @@ class AuthComponent extends React.Component<{
                 }
             }).then(user => {
                 if (user != null) {
-                    console.log(user)
+                    //console.log(user)
                     onAuth({
                         username: 'oauth2', //token
                         password: user?.access_token || ''

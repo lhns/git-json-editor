@@ -11,7 +11,7 @@ class GitJsonEditorComponent extends React.Component<{
     fs: git.PromiseFsClient,
     gitOpts: GitOpts
 }, {
-    selectedFile: string,
+    selectedFile?: string,
     schema?: string,
     data?: string,
     update: number,
@@ -48,6 +48,7 @@ class GitJsonEditorComponent extends React.Component<{
                                     ...state,
                                     schema,
                                     data,
+                                    selectedFile: data != null ? state.selectedFile : undefined,
                                     schemaError: undefined
                                 }))
                             }).catch((error: Error) => {
@@ -75,16 +76,17 @@ class GitJsonEditorComponent extends React.Component<{
                                     data={data}
                                     onChange={data => {
                                         this.setState(state => ({...state, data: data}))
-                                        const string = JSON.stringify(data, null, 2)
-                                        fs.promises.writeFile(
-                                            selectedFile,
-                                            string,
-                                            {encoding: 'utf8'}
-                                        ).then(() =>
-                                            this.setState(state => ({...state, update: (state.update || 0) + 1}))
-                                        )
-                                    }
-                                    }/> :
+                                        if (selectedFile != null) {
+                                            const string = JSON.stringify(data, null, 2)
+                                            fs.promises.writeFile(
+                                                selectedFile,
+                                                string,
+                                                {encoding: 'utf8'}
+                                            ).then(() =>
+                                                this.setState(state => ({...state, update: (state.update || 0) + 1}))
+                                            )
+                                        }
+                                    }}/> :
                                 schemaError != null ?
                                     <Alert>
                                         {schemaError}
