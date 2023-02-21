@@ -1,13 +1,12 @@
 import React from 'react'
 import * as git from 'isomorphic-git'
-import SubmitTextDialog from "./html/SubmitTextDialog";
+import CommitDialog from "./html/CommitDialog";
 import {GitOpts} from "./GitBranchSelectComponent";
 
 class GitCommitDialog extends React.Component<{
     fs: git.PromiseFsClient,
     gitOpts: GitOpts,
     repoDir: string,
-    branch: string,
     changes: [string, boolean][],
     onCommit: (message: string) => void,
     onAuthFailure: (url: string) => void,
@@ -20,7 +19,6 @@ class GitCommitDialog extends React.Component<{
             fs,
             gitOpts: {http, author, onAuth},
             repoDir,
-            branch,
             changes,
             onCommit,
             onAuthFailure,
@@ -28,11 +26,12 @@ class GitCommitDialog extends React.Component<{
         } = this.props
         const {disabled} = this.state || {}
 
-        return <SubmitTextDialog
+        return <CommitDialog
             action={`Commit (${changes.length})`}
-            placeholder="Commit Message"
+            placeholderMessage="Commit Message"
+            placeholderBranch="Branch"
             disabled={disabled || changes.length == 0}
-            onConfirm={message => {
+            onConfirm={(message, branch) => {
                 this.setState(state => ({...state, disabled: true}))
                 Promise.all(
                     changes.map(([filepath, status]) =>
@@ -45,7 +44,7 @@ class GitCommitDialog extends React.Component<{
                         fs,
                         dir: repoDir,
                         author,
-                        message: message
+                        message: message,
                     })
                 ).then(() =>
                     git.push({
@@ -53,7 +52,7 @@ class GitCommitDialog extends React.Component<{
                         http,
                         dir: repoDir,
                         remote: 'origin',
-                        ref: branch,
+                        remoteRef: 'refs/heads/' + branch,
                         onAuth,
                         onAuthFailure,
                     })

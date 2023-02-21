@@ -101,7 +101,6 @@ class GitRepoComponent extends React.Component<{
                 <GitCommitDialog
                     fs={fs}
                     gitOpts={gitOpts}
-                    branch={branch}
                     repoDir={repoDir}
                     changes={changes || []}
                     onCommit={() => this.getChanges()}

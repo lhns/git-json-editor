@@ -41,9 +41,14 @@ class InternalJsonEditorComponent extends React.Component<{
             if (editor.ignoreInitialChange) {
                 editor.ignoreInitialChange = false
             } else {
-                console.log('change')
                 const data = this.getValue(editor, initialData)
                 this.props.onChange(data)
+            }
+        })
+        editor.promise.then(() => {
+            const schema = editor.getEditor('root.$schema')
+            if (schema != null) {
+                schema.container.style.display = 'none'
             }
         })
         this.editor = editor

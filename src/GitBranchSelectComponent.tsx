@@ -51,28 +51,25 @@ class GitBranchSelectComponent extends React.Component<{
             onProgress: progress => {
                 this.setState(state => ({...state, progress: progress}))
             }
-        })
-            .then(() =>
-                git.listBranches({
-                    fs,
-                    dir: repoDir,
-                    remote: 'origin'
-                })
-            )
-            .then(branches => {
-                const filteredBranches = branches.filter(e => e !== 'HEAD')
-                const selected = initialBranch != null && filteredBranches.includes(initialBranch) ?
-                    initialBranch :
-                    filteredBranches[0]
-                this.setState(state => ({
-                    ...state,
-                    repoDir: repoDir,
-                    branches: filteredBranches,
-                    selected: selected
-                }))
-                onSelect(selected, repoDir)
+        }).then(() =>
+            git.listBranches({
+                fs,
+                dir: repoDir,
+                remote: 'origin'
             })
-            .catch(onError)
+        ).then(branches => {
+            const filteredBranches = branches.filter(e => e !== 'HEAD')
+            const selected = initialBranch != null && filteredBranches.includes(initialBranch) ?
+                initialBranch :
+                filteredBranches[0]
+            this.setState(state => ({
+                ...state,
+                repoDir: repoDir,
+                branches: filteredBranches,
+                selected: selected
+            }))
+            onSelect(selected, repoDir)
+        }).catch(onError)
     }
 
     componentDidMount() {
