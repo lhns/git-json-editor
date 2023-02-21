@@ -56,8 +56,10 @@ class InternalJsonEditorComponent extends React.Component<{
 
     componentDidUpdate(prevProps: any) {
         const {data} = this.props
-        if (JSON.stringify(data) !== JSON.stringify(prevProps.data)) {
-            const editor = this.editor
+        const editor = this.editor
+        const dataJson = JSON.stringify(data)
+        if (dataJson !== JSON.stringify(prevProps.data) &&
+            dataJson !== JSON.stringify(this.getValue(editor, prevProps.data))) {
             editor.promise.then(() => {
                 editor.ignoreInitialChange = true
                 editor.setValue(data)

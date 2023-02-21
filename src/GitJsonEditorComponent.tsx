@@ -90,7 +90,7 @@ class GitJsonEditorComponent extends React.Component<{
                                     schema={schema}
                                     data={data}
                                     onChange={(data: any) => {
-                                        //this.setState(state => ({...state, data: data}))
+                                        this.setState(state => ({...state, data: data}))
                                         if (selectedFile != null) {
                                             const string = JSON.stringify(data, null, 2)
                                             fs.promises.writeFile(

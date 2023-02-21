@@ -50,7 +50,7 @@ function loadSchema(string: string, corsProxy?: string): Promise<{ schema: any, 
     const data = JSON.parse(string)
     const schemaUrl = data['$schema']
     if (schemaUrl == null) {
-        throw new Error('$schema is not defined')
+        return Promise.resolve({schema: {}, data})
     } else if (isMetaSchemaUrl(schemaUrl)) {
         return Promise.resolve({schema: data, data: undefined})
     } else {
