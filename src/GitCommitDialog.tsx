@@ -8,7 +8,7 @@ class GitCommitDialog extends React.Component<{
     gitOpts: GitOpts,
     repoDir: string,
     changes: [string, boolean][],
-    onCommit: (message: string) => void,
+    onCommit: (message: string, branch: string) => void,
     onAuthFailure: (url: string) => void,
     onError: (error: Error) => void
 }, {
@@ -47,17 +47,31 @@ class GitCommitDialog extends React.Component<{
                         message: message,
                     })
                 ).then(() =>
-                    git.push({
+                    git.listBranches({
+                        fs,
+                        dir: repoDir,
+                        remote: 'origin'
+                    })
+                ).then(branches => {
+                    let newBranch = branch
+                    if (branches.includes(branch)) {
+                        let i = 2
+                        for (; branches.includes(branch + '-' + i); i++) {
+                        }
+                        newBranch = branch + '-' + i
+                    }
+
+                    return git.push({
                         fs,
                         http,
                         dir: repoDir,
                         remote: 'origin',
-                        remoteRef: 'refs/heads/' + branch,
+                        remoteRef: 'refs/heads/' + newBranch,
                         onAuth,
                         onAuthFailure,
-                    })
-                ).then(() => {
-                    onCommit(message)
+                    }).then(() => newBranch)
+                }).then(branch => {
+                    onCommit(message, branch)
                     this.setState(state => ({...state, disabled: false}))
                 }).catch(onError)
             }}/>

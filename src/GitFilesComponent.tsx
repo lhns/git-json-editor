@@ -18,61 +18,77 @@ class GitFilesComponent extends React.Component<{
     selected?: string,
     loading: boolean
 }> {
-    private checkout() {
-        const {fs, repoDir, branch, initialFilePath, onSelect, onError} = this.props
+    private checkout(): Promise<any> {
+        const {fs, repoDir, branch, initialFilePath} = this.props
 
         this.setState(() => ({}))
         if (fs != null && repoDir != null && branch != null) {
             this.setState(state => ({...state, loading: true}))
-            git.checkout({
+            return git.checkout({
                 fs,
                 dir: repoDir,
                 ref: branch,
                 force: true
-            })
-                .then(() => readDirRec(fs, repoDir))
-                .then(paths => {
-                    const files = paths
-                        .filter(e => !e.endsWith('/'))
-                        .sort((a, b) => a.localeCompare(b))
-                    const selected = initialFilePath != null && files.includes(initialFilePath) ?
-                        initialFilePath :
-                        undefined
-                    this.setState(state => ({...state, files: files, selected, loading: false}), () => {
-                        if (selected != null) {
-                            onSelect(selected)
-                        }
-                    })
-                })
-                .catch(onError)
+            }).then(() =>
+                this.refreshFiles(fs, repoDir, initialFilePath)
+            )
+        } else {
+            return Promise.resolve()
         }
+    }
+
+    private refreshFiles(fs: git.PromiseFsClient,
+                         repoDir: string,
+                         initialFilePath: string | undefined): Promise<any> {
+        console.log('refreshing ' + repoDir)
+        return readDirRec(fs, repoDir).then(paths => {
+            const files = paths
+                .filter(e => !e.endsWith('/'))
+                .sort((a, b) => a.localeCompare(b))
+            const selected = initialFilePath != null && files.includes(initialFilePath) ?
+                initialFilePath :
+                undefined
+            this.setState(state => ({...state, files: files, selected, loading: false}), () => {
+                if (selected != null) {
+                    // TODO: debounce onSelect
+                    this.props.onSelect(selected)
+                }
+            })
+        })
     }
 
     componentDidMount() {
         this.checkout()
+            .catch(this.props.onError)
     }
 
     componentDidUpdate(prevProps: any) {
-        const {fs, repoDir, branch} = this.props
+        const {fs, repoDir, branch, initialFilePath} = this.props
 
         if (fs !== prevProps.fs || repoDir !== prevProps.repoDir || branch !== prevProps.branch) {
             this.checkout()
+                .catch(this.props.onError)
+        } else if (initialFilePath !== prevProps.initialFilePath) {
+            this.refreshFiles(fs, repoDir, initialFilePath)
+                .catch(this.props.onError)
         }
     }
 
     private revertFile(file: string) {
-        const {fs, repoDir, onChange} = this.props
+        const {fs, repoDir} = this.props
 
         git.checkout({
             fs,
             dir: repoDir,
             force: true,
             filepaths: [relativePath(file, repoDir)]
-        }).then(() => onChange(file))
+        }).then(() =>
+            this.props.onChange(file)
+        )
     }
 
     render() {
-        const {repoDir, changes, onSelect} = this.props
+        const {repoDir, changes} = this.props
         const {files, selected, loading} = this.state || {}
 
         return loading ?
@@ -97,7 +113,7 @@ class GitFilesComponent extends React.Component<{
                 }}
                 onSelect={filePath => {
                     this.setState(state => ({...state, selected: filePath}))
-                    onSelect(filePath)
+                    this.props.onSelect(filePath)
                 }}/>
     }
 }

@@ -84,9 +84,10 @@ class GitRepoComponent extends React.Component<{
                         branch={branch}
                         changes={changes || []}
                         initialFilePath={selectedFilePath || (initialFile != null ? resolvePath(repoDir, initialFile) : undefined)}
-                        onSelect={file => {
-                            this.setState(state => ({...state, selectedFilePath: file}))
-                            onSelect(file, repoDir)
+                        onSelect={filePath => {
+                            console.log('select ' + filePath)
+                            this.setState(state => ({...state, selectedFilePath: filePath}))
+                            onSelect(filePath, repoDir)
                         }}
                         onChange={() => {
                             this.getChanges()
@@ -103,7 +104,12 @@ class GitRepoComponent extends React.Component<{
                     gitOpts={gitOpts}
                     repoDir={repoDir}
                     changes={changes || []}
-                    onCommit={() => this.getChanges()}
+                    onCommit={(_, branch) => {
+                        this.getChanges()
+                        const newUrl = new URL(gitOpts.url.replace(/(.git)?$/, '/-/merge_requests/new'))
+                        newUrl.searchParams.set('merge_request[source_branch]', branch)
+                        window.location.assign(newUrl)
+                    }}
                     onAuthFailure={onAuthFailure}
                     onError={onError}/>
             </div>

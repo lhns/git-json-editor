@@ -6,11 +6,13 @@ import ScrollPane from "./html/ScrollPane";
 import * as git from "isomorphic-git";
 import {GitOpts} from "./GitBranchSelectComponent";
 import Alert from "./html/Alert";
+import {v4 as uuidv4} from "uuid";
 
 class GitJsonEditorComponent extends React.Component<{
     fs: git.PromiseFsClient,
     gitOpts: GitOpts
 }, {
+    changeId?: string,
     selectedFile?: string,
     schema?: string,
     data?: string,
@@ -41,34 +43,39 @@ class GitJsonEditorComponent extends React.Component<{
                         update={update}
                         initialBranch={initialBranch || undefined}
                         initialFile={initialFile || undefined}
-                        onSelect={(file, repoDir) => {
+                        onSelect={(filePath, repoDir) => {
                             const newUrl = new URL(window.location.href)
-                            newUrl.searchParams.set('file', relativePath(file, repoDir))
+                            newUrl.searchParams.set('file', relativePath(filePath, repoDir))
                             window.history.replaceState(null, document.title, newUrl.href)
 
+                            const changeId = uuidv4()
                             const fileContent: Promise<string> = fs.promises.readFile(
-                                file,
+                                filePath,
                                 {encoding: 'utf8'}
                             )
-                            fileContent.then(string =>
+                            new Promise((resolve: any) =>
+                                this.setState(state => ({...state, changeId}), resolve)
+                            ).then(() =>
+                                fileContent
+                            ).then((string) =>
                                 loadSchema(string, gitOpts.corsProxy)
                             ).then(({schema, data}) => {
-                                this.setState((state) => ({
+                                this.setState((state) => state.changeId === changeId ? ({
                                     ...state,
-                                    selectedFile: data != null ? file : undefined,
+                                    selectedFile: data != null ? filePath : undefined,
                                     schema,
                                     data,
                                     schemaError: undefined
-                                }))
+                                }) : state)
                             }).catch((error: Error) => {
                                 console.error(error)
-                                this.setState((state) => ({
+                                this.setState((state) => state.changeId === changeId ? ({
                                     ...state,
                                     selectedFile: undefined,
                                     schema: undefined,
                                     data: undefined,
                                     schemaError: error.message
-                                }))
+                                }) : state)
                             })
                         }}
                         onBranchSelect={branch => {
