@@ -1,8 +1,8 @@
 import React from 'react'
-import * as git from "isomorphic-git";
-import {GitOpts} from "./GitBranchSelectComponent";
-import AuthComponent from "./AuthComponent";
-import GitJsonEditorComponent from "./GitJsonEditorComponent";
+import * as git from "isomorphic-git"
+import {GitOpts} from "./GitBranchSelectComponent"
+import AuthComponent from "./AuthComponent"
+import GitJsonEditorComponent from "./GitJsonEditorComponent"
 
 class MainComponent extends React.Component<{
     fs: git.PromiseFsClient,

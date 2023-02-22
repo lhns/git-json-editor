@@ -2,7 +2,7 @@ import React from 'react'
 import * as git from 'isomorphic-git'
 import {AuthCallback, GitProgressEvent} from 'isomorphic-git'
 import {v4 as uuidv4} from "uuid"
-import Select from "./html/Select";
+import Select from "./html/Select"
 
 type GitOpts = {
     http: git.HttpClient,

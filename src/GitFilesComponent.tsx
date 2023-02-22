@@ -2,7 +2,7 @@ import React from 'react'
 import * as git from 'isomorphic-git'
 import SelectList from './html/SelectList'
 import {readDirRec, relativePath} from './Utils'
-import CenteredSpinner from "./html/CenteredSpinner";
+import CenteredSpinner from "./html/CenteredSpinner"
 
 class GitFilesComponent extends React.Component<{
     fs: git.PromiseFsClient,

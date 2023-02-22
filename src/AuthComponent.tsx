@@ -1,6 +1,6 @@
 import React from 'react'
-import {UserManager} from "oidc-client-ts";
-import {GitLab} from "./GitPlatform";
+import {UserManager} from "oidc-client-ts"
+import {GitLab} from "./GitPlatform"
 
 class AuthComponent extends React.Component<{
     url: string,

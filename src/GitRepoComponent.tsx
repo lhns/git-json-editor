@@ -1,11 +1,11 @@
 import React from 'react'
 import * as git from 'isomorphic-git'
-import ScrollPane from "./html/ScrollPane";
-import GitFilesComponent from "./GitFilesComponent";
-import GitBranchSelectComponent, {GitOpts} from "./GitBranchSelectComponent";
-import GitCommitDialog from "./GitCommitDialog";
-import {resolvePath} from "./Utils";
-import {GitPlatform} from "./GitPlatform";
+import ScrollPane from "./html/ScrollPane"
+import GitFilesComponent from "./GitFilesComponent"
+import GitBranchSelectComponent, {GitOpts} from "./GitBranchSelectComponent"
+import GitCommitDialog from "./GitCommitDialog"
+import {resolvePath} from "./Utils"
+import {GitPlatform} from "./GitPlatform"
 
 class GitRepoComponent extends React.Component<{
     fs: git.PromiseFsClient,

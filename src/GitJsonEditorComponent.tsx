@@ -1,13 +1,13 @@
 import React from 'react'
 import GitRepoComponent from './GitRepoComponent'
 import JsonEditorComponent from "./JsonEditorComponent"
-import {loadSchema, relativePath} from "./Utils";
-import ScrollPane from "./html/ScrollPane";
-import * as git from "isomorphic-git";
-import {GitOpts} from "./GitBranchSelectComponent";
-import Alert from "./html/Alert";
-import {v4 as uuidv4} from "uuid";
-import {GitLab} from "./GitPlatform";
+import {loadSchema, relativePath} from "./Utils"
+import ScrollPane from "./html/ScrollPane"
+import * as git from "isomorphic-git"
+import {GitOpts} from "./GitBranchSelectComponent"
+import Alert from "./html/Alert"
+import {v4 as uuidv4} from "uuid"
+import {GitLab} from "./GitPlatform"
 
 class GitJsonEditorComponent extends React.Component<{
     fs: git.PromiseFsClient,

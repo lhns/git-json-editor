@@ -1,7 +1,7 @@
 import React from 'react'
 import * as git from 'isomorphic-git'
-import CommitDialog from "./html/CommitDialog";
-import {GitOpts} from "./GitBranchSelectComponent";
+import CommitDialog from "./html/CommitDialog"
+import {GitOpts} from "./GitBranchSelectComponent"
 
 class GitCommitDialog extends React.Component<{
     fs: git.PromiseFsClient,

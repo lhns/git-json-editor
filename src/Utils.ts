@@ -1,4 +1,4 @@
-import * as git from "isomorphic-git";
+import * as git from "isomorphic-git"
 
 function dirPath(path: string): string {
     return path.replace(/\/?$/, '/')
