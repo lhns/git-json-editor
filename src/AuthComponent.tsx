@@ -33,10 +33,9 @@ class AuthComponent extends React.Component<{
 
         const gitPlatform = GitLab
 
-        // gitlab
         const userManager = new UserManager({
             authority: new URL(url).origin,
-            client_id: client_id,
+            client_id,
             redirect_uri: window.location.href.replace(/^https?:\/\/[^\/?]*\/?/, redirect_origin),
             scope: gitPlatform.oauthScopes.join(' '),
             loadUserInfo: true

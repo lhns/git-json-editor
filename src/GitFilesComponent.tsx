@@ -30,7 +30,7 @@ class GitFilesComponent extends React.Component<{
                 ref: branch,
                 force: true
             }).then(() =>
-                this.refreshFiles(fs, repoDir, initialFilePath)
+                this.refreshFiles(fs, repoDir, initialFilePath, true)
             )
         } else {
             return Promise.resolve()
@@ -39,7 +39,8 @@ class GitFilesComponent extends React.Component<{
 
     private refreshFiles(fs: git.PromiseFsClient,
                          repoDir: string,
-                         initialFilePath: string | undefined): Promise<any> {
+                         initialFilePath: string | undefined,
+                         forceSelect?: boolean): Promise<any> {
         return readDirRec(fs, repoDir).then(paths => {
             const files = paths
                 .filter(e => !e.endsWith('/'))
@@ -49,7 +50,7 @@ class GitFilesComponent extends React.Component<{
                 undefined
             const prevSelected = this.state.selected
             this.setState(state => ({...state, files: files, selected, loading: false}), () => {
-                if (selected != null && selected !== prevSelected) {
+                if (selected != null && (selected !== prevSelected || forceSelect)) {
                     this.props.onSelect(selected)
                 }
             })

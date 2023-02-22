@@ -60,7 +60,12 @@ class GitJsonEditorComponent extends React.Component<{
                             ).then(() =>
                                 fileContent
                             ).then((string) =>
-                                loadSchema(string, gitOpts.corsProxy)
+                                loadSchema(
+                                    string,
+                                    /*fs,
+                                    path,*/
+                                    gitOpts.corsProxy
+                                )
                             ).then(({schema, data}) => {
                                 this.setState((state) => state.changeId === changeId ? ({
                                     ...state,

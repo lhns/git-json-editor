@@ -7,6 +7,7 @@ class GitCommitDialog extends React.Component<{
     fs: git.PromiseFsClient,
     gitOpts: GitOpts,
     repoDir: string,
+    branch: string,
     changes: [string, boolean][],
     onCommit: (message: string, branch: string) => void,
     onAuthFailure: (url: string) => void,
@@ -19,6 +20,7 @@ class GitCommitDialog extends React.Component<{
             fs,
             gitOpts: {http, author, onAuth},
             repoDir,
+            branch,
             changes,
             onCommit,
             onAuthFailure,
@@ -31,7 +33,7 @@ class GitCommitDialog extends React.Component<{
             placeholderMessage="Commit Message"
             placeholderBranch="Branch"
             disabled={disabled || changes.length == 0}
-            onConfirm={(message, branch) => {
+            onConfirm={(message, commitBranch) => {
                 this.setState(state => ({...state, disabled: true}))
                 Promise.all(
                     changes.map(([filepath, status]) =>
@@ -53,12 +55,12 @@ class GitCommitDialog extends React.Component<{
                         remote: 'origin'
                     })
                 ).then(branches => {
-                    let newBranch = branch
-                    if (branches.includes(branch)) {
+                    let newBranch = commitBranch
+                    if (commitBranch !== branch && branches.includes(commitBranch)) {
                         let i = 2
-                        for (; branches.includes(branch + '-' + i); i++) {
+                        for (; branches.includes(commitBranch + '-' + i); i++) {
                         }
-                        newBranch = branch + '-' + i
+                        newBranch = commitBranch + '-' + i
                     }
 
                     return git.push({
@@ -69,10 +71,10 @@ class GitCommitDialog extends React.Component<{
                         remoteRef: 'refs/heads/' + newBranch,
                         onAuth,
                         onAuthFailure,
-                    }).then(() => newBranch)
-                }).then(branch => {
-                    onCommit(message, branch)
-                    this.setState(state => ({...state, disabled: false}))
+                    }).then(() => {
+                        onCommit(message, newBranch)
+                        this.setState(state => ({...state, disabled: false}))
+                    })
                 }).catch(onError)
             }}/>
     }

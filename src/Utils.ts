@@ -17,6 +17,10 @@ function relativePath(path: string, parent: string | null): string {
     }
 }
 
+function isUrl(url: string): boolean {
+    return /[^:\/]+:\/\//.test(url)
+}
+
 function readDirRec(fs: git.PromiseFsClient, path: string, hidden: boolean = false): Promise<string[]> {
     return fs.promises.lstat(path).then((stat: { type: string }) => {
         if (stat.type === 'dir') {
@@ -46,7 +50,7 @@ function isMetaSchemaUrl(schemaUrl: string): boolean {
     return /^https?:\/\/json-schema.org\/.*\/schema#?$/.test(schemaUrl)
 }
 
-function loadSchema(string: string, corsProxy?: string): Promise<{ schema: any, data?: any }> {
+function loadSchema(string: string, /*fs: git.PromiseFsClient, dir: string,*/ corsProxy?: string): Promise<{ schema: any, data?: any }> {
     const data = JSON.parse(string)
     const schemaUrl = data['$schema']
     if (schemaUrl == null) {
