@@ -40,7 +40,6 @@ class GitFilesComponent extends React.Component<{
     private refreshFiles(fs: git.PromiseFsClient,
                          repoDir: string,
                          initialFilePath: string | undefined): Promise<any> {
-        console.log('refreshing ' + repoDir)
         return readDirRec(fs, repoDir).then(paths => {
             const files = paths
                 .filter(e => !e.endsWith('/'))
@@ -48,9 +47,9 @@ class GitFilesComponent extends React.Component<{
             const selected = initialFilePath != null && files.includes(initialFilePath) ?
                 initialFilePath :
                 undefined
+            const prevSelected = this.state.selected
             this.setState(state => ({...state, files: files, selected, loading: false}), () => {
-                if (selected != null) {
-                    // TODO: debounce onSelect
+                if (selected != null && selected !== prevSelected) {
                     this.props.onSelect(selected)
                 }
             })

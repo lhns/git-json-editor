@@ -104,10 +104,11 @@ class GitRepoComponent extends React.Component<{
                     gitOpts={gitOpts}
                     repoDir={repoDir}
                     changes={changes || []}
-                    onCommit={(_, branch) => {
+                    onCommit={(_, commitBranch) => {
                         this.getChanges()
                         const newUrl = new URL(gitOpts.url.replace(/(.git)?$/, '/-/merge_requests/new'))
-                        newUrl.searchParams.set('merge_request[source_branch]', branch)
+                        newUrl.searchParams.set('merge_request[source_branch]', commitBranch)
+                        newUrl.searchParams.set('merge_request[target_branch]', branch)
                         window.location.assign(newUrl)
                     }}
                     onAuthFailure={onAuthFailure}
