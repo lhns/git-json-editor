@@ -4,8 +4,8 @@ import ScrollPane from "./html/ScrollPane"
 import GitFilesComponent from "./GitFilesComponent"
 import GitBranchSelectComponent, {GitOpts} from "./GitBranchSelectComponent"
 import GitCommitDialog from "./GitCommitDialog"
-import {resolvePath} from "./Utils"
 import {GitPlatform} from "./GitPlatform"
+import {resolve} from "@isomorphic-git/lightning-fs/src/path";
 
 class GitRepoComponent extends React.Component<{
     fs: git.PromiseFsClient,
@@ -85,7 +85,7 @@ class GitRepoComponent extends React.Component<{
                         repoDir={repoDir}
                         branch={branch}
                         changes={changes || []}
-                        initialFilePath={selectedFilePath || (initialFile != null ? resolvePath(repoDir, initialFile) : undefined)}
+                        initialFilePath={selectedFilePath || (repoDir != null && initialFile != null ? resolve(repoDir, initialFile) : undefined)}
                         onSelect={filePath => {
                             this.setState(state => ({...state, selectedFilePath: filePath}))
                             onSelect(filePath, repoDir)

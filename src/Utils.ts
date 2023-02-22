@@ -1,15 +1,8 @@
 import * as git from "isomorphic-git"
-
-function dirPath(path: string): string {
-    return path.replace(/\/?$/, '/')
-}
-
-function resolvePath(parent: string | null, child: string): string {
-    return (parent != null ? dirPath(parent) : '') + child
-}
+import {resolve} from "@isomorphic-git/lightning-fs/src/path";
 
 function relativePath(path: string, parent: string | null): string {
-    const prefix = (parent != null ? dirPath(parent) : '')
+    const prefix = (parent != null ? parent.replace(/\/?$/, '/') : '')
     if (path.startsWith(prefix)) {
         return path.substring(prefix.length)
     } else {
@@ -50,18 +43,23 @@ function isMetaSchemaUrl(schemaUrl: string): boolean {
     return /^https?:\/\/json-schema.org\/.*\/schema#?$/.test(schemaUrl)
 }
 
-function loadSchema(string: string, /*fs: git.PromiseFsClient, dir: string,*/ corsProxy?: string): Promise<{ schema: any, data?: any }> {
+function loadSchema(string: string, fs: git.PromiseFsClient, dir: string, corsProxy?: string): Promise<{ schema: any, data?: any }> {
     const data = JSON.parse(string)
     const schemaUrl = data['$schema']
     if (schemaUrl == null) {
         return Promise.resolve({schema: {}, data})
     } else if (isMetaSchemaUrl(schemaUrl)) {
         return Promise.resolve({schema: data, data: undefined})
-    } else {
+    } else if (isUrl(schemaUrl)) {
         return fetch(withCorsProxy(schemaUrl, corsProxy))
             .then((response: Response) => response.json())
             .then((schema: any) => ({schema, data}))
+    } else {
+        return fs.promises.readFile(
+            resolve(dir, schemaUrl),
+            {encoding: 'utf8'}
+        ).then((string: string) => ({schema: JSON.parse(string), data}))
     }
 }
 
-export {resolvePath, relativePath, readDirRec, withCorsProxy, isMetaSchemaUrl, loadSchema}
+export {relativePath, readDirRec, withCorsProxy, isMetaSchemaUrl, loadSchema}

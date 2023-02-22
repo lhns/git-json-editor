@@ -8,6 +8,7 @@ import {GitOpts} from "./GitBranchSelectComponent"
 import Alert from "./html/Alert"
 import {v4 as uuidv4} from "uuid"
 import {GitLab} from "./GitPlatform"
+import {dirname} from "@isomorphic-git/lightning-fs/src/path";
 
 class GitJsonEditorComponent extends React.Component<{
     fs: git.PromiseFsClient,
@@ -62,8 +63,8 @@ class GitJsonEditorComponent extends React.Component<{
                             ).then((string) =>
                                 loadSchema(
                                     string,
-                                    /*fs,
-                                    path,*/
+                                    fs,
+                                    dirname(filePath),
                                     gitOpts.corsProxy
                                 )
                             ).then(({schema, data}) => {
