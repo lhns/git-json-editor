@@ -5,10 +5,12 @@ import GitFilesComponent from "./GitFilesComponent";
 import GitBranchSelectComponent, {GitOpts} from "./GitBranchSelectComponent";
 import GitCommitDialog from "./GitCommitDialog";
 import {resolvePath} from "./Utils";
+import {GitPlatform} from "./GitPlatform";
 
 class GitRepoComponent extends React.Component<{
     fs: git.PromiseFsClient,
     gitOpts: GitOpts,
+    gitPlatform: GitPlatform,
     update?: any,
     initialBranch?: string,
     initialFile?: string,
@@ -85,7 +87,6 @@ class GitRepoComponent extends React.Component<{
                         changes={changes || []}
                         initialFilePath={selectedFilePath || (initialFile != null ? resolvePath(repoDir, initialFile) : undefined)}
                         onSelect={filePath => {
-                            console.log('select ' + filePath)
                             this.setState(state => ({...state, selectedFilePath: filePath}))
                             onSelect(filePath, repoDir)
                         }}
@@ -106,10 +107,10 @@ class GitRepoComponent extends React.Component<{
                     changes={changes || []}
                     onCommit={(_, commitBranch) => {
                         this.getChanges()
-                        const newUrl = new URL(gitOpts.url.replace(/(.git)?$/, '/-/merge_requests/new'))
-                        newUrl.searchParams.set('merge_request[source_branch]', commitBranch)
-                        newUrl.searchParams.set('merge_request[target_branch]', branch)
-                        window.location.assign(newUrl)
+                        const newUrl = this.props.gitPlatform.getMergeRequestUrl(gitOpts.url, commitBranch, branch)
+                        if (newUrl != null) {
+                            window.location.assign(newUrl)
+                        }
                     }}
                     onAuthFailure={onAuthFailure}
                     onError={onError}/>

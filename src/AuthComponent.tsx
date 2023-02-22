@@ -1,5 +1,6 @@
 import React from 'react'
 import {UserManager} from "oidc-client-ts";
+import {GitLab} from "./GitPlatform";
 
 class AuthComponent extends React.Component<{
     url: string,
@@ -30,12 +31,14 @@ class AuthComponent extends React.Component<{
         const {url, client_id, redirect_origin, onAuth, children} = this.props
         const {username, password, name, email, authenticated} = this.state || {}
 
+        const gitPlatform = GitLab
+
         // gitlab
         const userManager = new UserManager({
             authority: new URL(url).origin,
             client_id: client_id,
             redirect_uri: window.location.href.replace(/^https?:\/\/[^\/?]*\/?/, redirect_origin),
-            scope: 'read_repository write_repository openid email',
+            scope: gitPlatform.oauthScopes.join(' '),
             loadUserInfo: true
         })
         userManager.events.addAccessTokenExpiring(function () {
@@ -63,13 +66,12 @@ class AuthComponent extends React.Component<{
             }).then(user => {
                 if (user != null) {
                     //console.log(user)
-                    onAuth({
-                        username: 'oauth2', //token
-                        password: user?.access_token || ''
-                    }, {
-                        name: user.profile.name || '',
-                        email: user.profile.email || ''
-                    })
+                    onAuth(
+                        gitPlatform.oauthCredentials(user?.access_token || ''),
+                        {
+                            name: user.profile.name || '',
+                            email: user.profile.email || ''
+                        })
                     this.setState(state => ({...state, authenticated: true}))
                 }
             })

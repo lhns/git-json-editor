@@ -7,6 +7,7 @@ import * as git from "isomorphic-git";
 import {GitOpts} from "./GitBranchSelectComponent";
 import Alert from "./html/Alert";
 import {v4 as uuidv4} from "uuid";
+import {GitLab} from "./GitPlatform";
 
 class GitJsonEditorComponent extends React.Component<{
     fs: git.PromiseFsClient,
@@ -40,6 +41,7 @@ class GitJsonEditorComponent extends React.Component<{
                     <GitRepoComponent
                         fs={fs}
                         gitOpts={gitOpts}
+                        gitPlatform={GitLab}
                         update={update}
                         initialBranch={initialBranch || undefined}
                         initialFile={initialFile || undefined}
