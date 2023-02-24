@@ -3,6 +3,6 @@ FROM node:18
 RUN mkdir /project
 WORKDIR /project
 COPY * ./
-RUN npm ci
+#RUN npm ci
 
-CMD npm run prod
+#CMD npm run prod
