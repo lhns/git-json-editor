@@ -75,6 +75,7 @@ class AuthComponent extends React.Component<{
                 url={url}
                 onAuth={(credentials, author) => {
                     onAuth(Git, credentials, author)
+                    this.setState(state => ({...state, authenticated: true}))
                 }}/>
         }
     }

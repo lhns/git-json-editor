@@ -107,6 +107,13 @@ class AuthDialog extends React.Component<{
                         }}>
                     Login
                 </button>
+                <button type="button"
+                        className="btn btn-outline-primary"
+                        onClick={() => {
+                            onAuth({username: '', password: ''}, {name: '', email: ''})
+                        }}>
+                    Skip
+                </button>
             </div>
         </div>
     }
