@@ -5,7 +5,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import http from 'isomorphic-git/http/web'
 import LightningFS from '@isomorphic-git/lightning-fs'
-import MainComponent from "./MainComponent"
+import MainComponent from './MainComponent'
 // @ts-ignore
 import * as bootstrap from 'bootstrap'
 // @ts-ignore
