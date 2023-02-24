@@ -1,35 +1,33 @@
 import React from 'react'
 import {UserManager} from "oidc-client-ts"
-import {Git, GitLab, GitPlatform} from "./GitPlatform"
+import {Git, GitPlatform, loadGitPlatform, storeGitPlatform} from "./GitPlatform"
 import AuthDialog from "./html/AuthDialog";
 
 class AuthComponent extends React.Component<{
     url: string,
-    client_id: string,
+    client_ids: Record<string, string>,
     redirect_origin: string,
     onAuth: (gitPlatform: GitPlatform, credentials: { username: string, password: string }, author: { name: string, email: string }) => void,
     children: React.ReactNode
 }, {
-    userManager: UserManager,
+    gitPlatform: GitPlatform | null,
+    userManager: UserManager | null,
     authenticated: boolean
 }> {
-    render() {
-        const {url, client_id, redirect_origin, onAuth, children} = this.props
-        const {authenticated} = this.state || {}
+    getUserManager(gitPlatform: GitPlatform): UserManager | null {
+        const {url, client_ids, redirect_origin} = this.props
 
-        const gitPlatform = GitLab
+        const redirect_uri = window.location.href.replace(/^https?:\/\/[^\/?]*\/?/, redirect_origin)
+        return gitPlatform.userManager(url, client_ids, redirect_uri)
+    }
 
-        const userManager = new UserManager({
-            authority: new URL(url).origin,
-            client_id,
-            redirect_uri: window.location.href.replace(/^https?:\/\/[^\/?]*\/?/, redirect_origin),
-            scope: gitPlatform.oauthScopes.join(' '),
-            loadUserInfo: true
-        })
-        userManager.events.addAccessTokenExpiring(function () {
-            console.log("token expiring...");
-        })
-        if (!authenticated) {
+    componentDidMount() {
+        const {url, onAuth} = this.props
+
+        const gitPlatform = loadGitPlatform(url)
+        const userManager = gitPlatform != null ? this.getUserManager(gitPlatform) : null
+
+        if (gitPlatform != null && userManager != null) {
             userManager.getUser().then(user => {
                 if (user != null) {
                     return user
@@ -41,7 +39,7 @@ class AuthComponent extends React.Component<{
                             const newUrl = new URL(url)
                             newUrl.searchParams.delete('code')
                             newUrl.searchParams.delete('state')
-                            window.location.replace(newUrl.href)
+                            window.history.replaceState(null, document.title, newUrl.href)
                             return user
                         })
                     } else {
@@ -50,7 +48,6 @@ class AuthComponent extends React.Component<{
                 }
             }).then(user => {
                 if (user != null) {
-                    //console.log(user)
                     onAuth(
                         gitPlatform,
                         gitPlatform.oauthCredentials(user?.access_token || ''),
@@ -62,18 +59,28 @@ class AuthComponent extends React.Component<{
                 }
             })
         }
+    }
 
+    render() {
+        const {url, onAuth, children} = this.props
+        const {authenticated} = this.state || {}
 
-        return authenticated ?
-            children :
-            <AuthDialog
+        if (authenticated) {
+            return children
+        } else {
+            return <AuthDialog
                 url={url}
                 onAuth={(credentials, author) => {
                     onAuth(Git, credentials, author)
                 }}
                 onSsoAuth={gitPlatform => {
-                    userManager.signinRedirect()
+                    const userManager = this.getUserManager(gitPlatform)
+                    if (userManager != null) {
+                        storeGitPlatform(url, gitPlatform)
+                        userManager?.signinRedirect()
+                    }
                 }}/>
+        }
     }
 }
 

@@ -2,7 +2,7 @@
 
 interface ImportMetaEnv {
     readonly VITE_CORS_PROXY: string | undefined
-    readonly VITE_CLIENT_ID: string
+    readonly VITE_CLIENT_IDS: string
     readonly VITE_REDIRECT_ORIGIN: string
 }
 

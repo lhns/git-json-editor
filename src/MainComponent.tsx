@@ -8,7 +8,7 @@ import {GitPlatform} from "./GitPlatform";
 class MainComponent extends React.Component<{
     fs: git.PromiseFsClient,
     gitOpts: GitOpts,
-    client_id: string,
+    client_ids: Record<string, string>,
     redirect_origin: string
 }, {
     gitPlatform: GitPlatform,
@@ -16,12 +16,12 @@ class MainComponent extends React.Component<{
     author: { name: string, email: string }
 }> {
     render() {
-        const {fs, gitOpts, client_id, redirect_origin} = this.props
+        const {fs, gitOpts, client_ids, redirect_origin} = this.props
         const {gitPlatform, author, credentials} = this.state || {}
 
         return <AuthComponent
             url={gitOpts.url}
-            client_id={client_id}
+            client_ids={client_ids}
             redirect_origin={redirect_origin}
             onAuth={(gitPlatform, credentials, author) => {
                 this.setState(state => ({...state, gitPlatform, credentials, author}))

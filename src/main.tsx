@@ -30,7 +30,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
                     url: url,
                     corsProxy: import.meta.env.VITE_CORS_PROXY
                 }}
-                client_id={import.meta.env.VITE_CLIENT_ID}
+                client_ids={JSON.parse(import.meta.env.VITE_CLIENT_IDS)}
                 redirect_origin={import.meta.env.VITE_REDIRECT_ORIGIN}/>
     }</React.StrictMode>,
 )
