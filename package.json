@@ -20,7 +20,7 @@
     "@isomorphic-git/lightning-fs": "^4.6.0",
     "@json-editor/json-editor": "^2.9.0-beta.1",
     "@types/bootstrap": "^5.2.6",
-    "@types/uuid": "^9.0.0",
+    "@types/uuid": "^9.0.1",
     "bootstrap": "^5.2.3",
     "buffer": "^6.0.3",
     "isomorphic-git": "^1.21.0",
