@@ -1,10 +1,8 @@
 import React from 'react'
-import {GitHub, GitLab, GitPlatform} from "../GitPlatform";
 
 class AuthDialog extends React.Component<{
     url: string,
     onAuth: (credentials: { username: string, password: string }, author: { name: string, email: string }) => void
-    onSsoAuth: (gitPlatform: GitPlatform) => void
 }, {
     username: string,
     password: string,
@@ -23,7 +21,7 @@ class AuthDialog extends React.Component<{
     }
 
     render() {
-        const {url, onAuth, onSsoAuth} = this.props
+        const {url, onAuth} = this.props
         const {username, password, name, email} = this.state || {}
 
         const authFromInputs = () => {
@@ -34,7 +32,6 @@ class AuthDialog extends React.Component<{
                 name,
                 email
             })
-            this.setState(state => ({...state, authenticated: true}))
         }
 
         return <div className="container">
@@ -92,7 +89,7 @@ class AuthDialog extends React.Component<{
                     type="text"
                     className="form-control"
                     placeholder="Email"
-                    value={username || ''}
+                    value={email || ''}
                     onChange={event => {
                         const value = event.target.value
                         this.setState(state => ({...state, email: value}))
@@ -109,16 +106,6 @@ class AuthDialog extends React.Component<{
                             authFromInputs()
                         }}>
                     Login
-                </button>
-                <button type="button"
-                        className="btn btn-outline-primary"
-                        onClick={() => onSsoAuth(GitLab)}>
-                    GitLab
-                </button>
-                <button type="button"
-                        className="btn btn-outline-primary"
-                        onClick={() => onSsoAuth(GitHub)}>
-                    GitHub
                 </button>
             </div>
         </div>

@@ -3,8 +3,8 @@ import {UserManager} from "oidc-client-ts";
 interface GitPlatform {
     id: string
 
-    userManager(url: string,
-                client_ids: Record<string, string>,
+    userManager(authority: string,
+                client_id: string,
                 redirect_uri: string): UserManager | null
 
     oauthCredentials(token: string): { username: string, password: string }
@@ -14,7 +14,7 @@ interface GitPlatform {
 
 const Git: GitPlatform = {
     id: 'git',
-    userManager(url: string, client_ids: Record<string, string>, redirect_uri: string): UserManager | null {
+    userManager(authority: string, client_id: string, redirect_uri: string): UserManager | null {
         return null
     },
     oauthCredentials(token: string): { username: string; password: string } {
@@ -25,35 +25,29 @@ const Git: GitPlatform = {
     }
 }
 
-const newUserManager = (url: string,
-                        client_ids: Record<string, string>,
+const newUserManager = (authority: string,
+                        client_id: string,
                         redirect_uri: string,
                         scopes: string[]) => {
-    const origin = new URL(url).origin
-    const client_id = client_ids[origin]
-    if (client_id != null) {
-        const userManager = new UserManager({
-            authority: origin,
-            client_id,
-            redirect_uri,
-            scope: scopes.length != 0 ? scopes.join(' ') : undefined,
-            loadUserInfo: true
-        })
-        userManager.events.addAccessTokenExpiring(function () {
-            console.log("token expiring...");
-        })
-        return userManager
-    } else {
-        return null
-    }
+    const userManager = new UserManager({
+        authority,
+        client_id,
+        redirect_uri,
+        scope: scopes.length != 0 ? scopes.join(' ') : undefined,
+        loadUserInfo: true
+    })
+    userManager.events.addAccessTokenExpiring(function () {
+        console.log("token expiring...");
+    })
+    return userManager
 }
 
 const GitLab: GitPlatform = {
     id: 'gitlab',
-    userManager(url: string, client_ids: Record<string, string>, redirect_uri: string): UserManager | null {
+    userManager(authority: string, client_id: string, redirect_uri: string): UserManager | null {
         return newUserManager(
-            url, client_ids, redirect_uri,
-            ['read_repository', 'write_repository', 'openid', 'email']
+            authority, client_id, redirect_uri,
+            ['openid', 'read_repository', 'write_repository', 'email']
         )
     },
     oauthCredentials(token: string): { username: string; password: string } {
@@ -69,10 +63,10 @@ const GitLab: GitPlatform = {
 
 const GitHub: GitPlatform = {
     id: 'github',
-    userManager(url: string, client_ids: Record<string, string>, redirect_uri: string): UserManager | null {
+    userManager(authority: string, client_id: string, redirect_uri: string): UserManager | null {
         return newUserManager(
-            url, client_ids, redirect_uri,
-            []
+            authority, client_id, redirect_uri,
+            ['openid', 'repo', 'user:email']
         )
     },
     oauthCredentials(token: string): { username: string; password: string } {
@@ -89,17 +83,21 @@ const gitPlatforms: GitPlatform[] = [
     GitHub
 ]
 
-const storageKey = (url: string) => 'git-platform:' + new URL(url).origin
-
-const storeGitPlatform = (url: string, gitPlatform: GitPlatform) => {
-    window.sessionStorage.setItem(storageKey(url), gitPlatform.id)
-}
-const loadGitPlatform = (url: string): GitPlatform | null => {
-    const id = window.sessionStorage.getItem(storageKey(url))
-    if (id == null) return null
+const ssoPlatform = (url: string, client_ids: Record<string, string>): {
+    gitPlatform: GitPlatform,
+    authority: string,
+    client_id: string
+} | null => {
+    const authority = new URL(url).origin
+    const client_id_entry = client_ids[authority]
+    if (client_id_entry == null) return null;
+    const parts = client_id_entry.split(":")
+    const id = parts.shift()
+    const client_id = parts.join(':')
     const gitPlatform = gitPlatforms.find(gitPlatform => gitPlatform.id === id)
-    return gitPlatform || null
+    if (gitPlatform == null) return null;
+    return {gitPlatform, authority, client_id}
 }
 
-export {Git, GitLab, GitHub, storeGitPlatform, loadGitPlatform}
+export {Git, GitLab, GitHub, ssoPlatform}
 export type {GitPlatform}

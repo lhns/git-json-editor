@@ -8,11 +8,11 @@ In-Browser [JSON Editor](https://github.com/json-editor/json-editor) for Git Rep
 
 ## Environment Variables
 
-| Variable             | Example                          |
-|----------------------|----------------------------------|
-| VITE_CLIENT_IDS      | {"https://gitlab.com":"abcdefg"} |
-| VITE_CORS_PROXY      | https://cors.isomorphic-git.org  |
-| VITE_REDIRECT_ORIGIN | http://localhost:4173            |
+| Variable             | Example                                 |
+|----------------------|-----------------------------------------|
+| VITE_CLIENT_IDS      | {"https://gitlab.com":"gitlab:abcdefg"} |
+| VITE_CORS_PROXY      | https://cors.isomorphic-git.org         |
+| VITE_REDIRECT_ORIGIN | http://localhost:4173                   |
 
 ## License
 

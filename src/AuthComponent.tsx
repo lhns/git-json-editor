@@ -1,6 +1,6 @@
 import React from 'react'
 import {UserManager} from "oidc-client-ts"
-import {Git, GitPlatform, loadGitPlatform, storeGitPlatform} from "./GitPlatform"
+import {Git, GitPlatform, ssoPlatform} from "./GitPlatform"
 import AuthDialog from "./html/AuthDialog";
 
 class AuthComponent extends React.Component<{
@@ -14,19 +14,21 @@ class AuthComponent extends React.Component<{
     userManager: UserManager | null,
     authenticated: boolean
 }> {
-    getUserManager(gitPlatform: GitPlatform): UserManager | null {
+    platformAndUserManager(): { gitPlatform: GitPlatform, userManager: UserManager } | null {
         const {url, client_ids, redirect_origin} = this.props
 
+        const {gitPlatform, authority, client_id} = ssoPlatform(url, client_ids) || {}
+        if (gitPlatform == null || authority == null || client_id == null) return null
         const redirect_uri = window.location.href.replace(/^https?:\/\/[^\/?]*\/?/, redirect_origin)
-        return gitPlatform.userManager(url, client_ids, redirect_uri)
+        const userManager = gitPlatform.userManager(authority, client_id, redirect_uri)
+        if (userManager == null) return null
+        return {gitPlatform, userManager}
     }
 
     componentDidMount() {
-        const {url, onAuth} = this.props
+        const {onAuth} = this.props
 
-        const gitPlatform = loadGitPlatform(url)
-        const userManager = gitPlatform != null ? this.getUserManager(gitPlatform) : null
-
+        const {gitPlatform, userManager} = this.platformAndUserManager() || {}
         if (gitPlatform != null && userManager != null) {
             userManager.getUser().then(user => {
                 if (user != null) {
@@ -43,7 +45,8 @@ class AuthComponent extends React.Component<{
                             return user
                         })
                     } else {
-                        return null
+                        userManager?.signinRedirect()
+                        return null;
                     }
                 }
             }).then(user => {
@@ -72,13 +75,6 @@ class AuthComponent extends React.Component<{
                 url={url}
                 onAuth={(credentials, author) => {
                     onAuth(Git, credentials, author)
-                }}
-                onSsoAuth={gitPlatform => {
-                    const userManager = this.getUserManager(gitPlatform)
-                    if (userManager != null) {
-                        storeGitPlatform(url, gitPlatform)
-                        userManager?.signinRedirect()
-                    }
                 }}/>
         }
     }
