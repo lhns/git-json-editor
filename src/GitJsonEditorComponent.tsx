@@ -7,12 +7,13 @@ import * as git from "isomorphic-git"
 import {GitOpts} from "./GitBranchSelectComponent"
 import Alert from "./html/Alert"
 import {v4 as uuidv4} from "uuid"
-import {GitLab} from "./GitPlatform"
+import {GitPlatform} from "./GitPlatform"
 import {dirname} from "@isomorphic-git/lightning-fs/src/path";
 
 class GitJsonEditorComponent extends React.Component<{
     fs: git.PromiseFsClient,
-    gitOpts: GitOpts
+    gitOpts: GitOpts,
+    gitPlatform: GitPlatform
 }, {
     changeId?: string,
     selectedFile?: string,
@@ -23,7 +24,7 @@ class GitJsonEditorComponent extends React.Component<{
     globalError?: string
 }> {
     render() {
-        const {fs, gitOpts} = this.props
+        const {fs, gitOpts, gitPlatform} = this.props
         const {selectedFile, schema, data, update, schemaError, globalError} = this.state || {}
 
         const params = new URL(window.location.href).searchParams
@@ -42,7 +43,7 @@ class GitJsonEditorComponent extends React.Component<{
                     <GitRepoComponent
                         fs={fs}
                         gitOpts={gitOpts}
-                        gitPlatform={GitLab}
+                        gitPlatform={gitPlatform}
                         update={update}
                         initialBranch={initialBranch || undefined}
                         initialFile={initialFile || undefined}

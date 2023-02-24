@@ -3,6 +3,7 @@ import * as git from "isomorphic-git"
 import {GitOpts} from "./GitBranchSelectComponent"
 import AuthComponent from "./AuthComponent"
 import GitJsonEditorComponent from "./GitJsonEditorComponent"
+import {GitPlatform} from "./GitPlatform";
 
 class MainComponent extends React.Component<{
     fs: git.PromiseFsClient,
@@ -10,21 +11,25 @@ class MainComponent extends React.Component<{
     client_id: string,
     redirect_origin: string
 }, {
+    gitPlatform: GitPlatform,
     credentials: { username: string, password: string },
     author: { name: string, email: string }
 }> {
     render() {
         const {fs, gitOpts, client_id, redirect_origin} = this.props
-        const {author, credentials} = this.state || {}
+        const {gitPlatform, author, credentials} = this.state || {}
 
         return <AuthComponent
             url={gitOpts.url}
             client_id={client_id}
             redirect_origin={redirect_origin}
-            onAuth={(credentials, author) => {
-                this.setState(state => ({...state, credentials, author}))
+            onAuth={(gitPlatform, credentials, author) => {
+                this.setState(state => ({...state, gitPlatform, credentials, author}))
             }}>
-            <GitJsonEditorComponent fs={fs} gitOpts={{...gitOpts, author, onAuth: () => credentials}}/>
+            <GitJsonEditorComponent
+                fs={fs}
+                gitOpts={{...gitOpts, author, onAuth: () => credentials}}
+                gitPlatform={gitPlatform}/>
         </AuthComponent>
     }
 }

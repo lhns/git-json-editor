@@ -1,4 +1,6 @@
 interface GitPlatform {
+    id: string
+
     oauthScopes: string[]
 
     oauthCredentials(token: string): { username: string, password: string }
@@ -6,7 +8,19 @@ interface GitPlatform {
     getMergeRequestUrl(url: string, sourceBranch: string, targetBranch: string): string | null
 }
 
+const Git: GitPlatform = {
+    id: 'git',
+    oauthScopes: [],
+    oauthCredentials(token: string): { username: string; password: string } {
+        return {username: '', password: ''}
+    },
+    getMergeRequestUrl(url: string, sourceBranch: string, targetBranch: string): string | null {
+        return null;
+    }
+}
+
 const GitLab: GitPlatform = {
+    id: 'gitlab',
     oauthScopes: ['read_repository', 'write_repository', 'openid', 'email'],
     oauthCredentials(token: string): { username: string; password: string } {
         return {username: 'oauth2', password: token}
@@ -20,6 +34,7 @@ const GitLab: GitPlatform = {
 }
 
 const GitHub: GitPlatform = {
+    id: 'github',
     oauthScopes: [],
     oauthCredentials(token: string): { username: string; password: string } {
         return {username: token, password: 'x-oauth-basic'}
@@ -29,5 +44,5 @@ const GitHub: GitPlatform = {
     }
 }
 
-export {GitLab, GitHub}
+export {Git, GitLab, GitHub}
 export type {GitPlatform}
