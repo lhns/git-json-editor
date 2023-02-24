@@ -1,6 +1,6 @@
 # git-json-editor
 
-[![Test Workflow](https://github.com/lhns/git-json-editor/workflows/node.js.yml/badge.svg)](https://github.com/lhns/git-json-editor/actions?query=workflow%3A"Node.js+CI")
+[![Node.js CI](https://github.com/lhns/git-json-editor/actions/workflows/node.js.yml/badge.svg)](https://github.com/lhns/git-json-editor/actions/workflows/node.js.yml)
 [![Release Notes](https://img.shields.io/github/release/lhns/git-json-editor.svg?maxAge=3600)](https://github.com/lhns/git-json-editor/releases/latest)
 [![Apache License 2.0](https://img.shields.io/github/license/lhns/git-json-editor.svg?maxAge=3600)](https://www.apache.org/licenses/LICENSE-2.0)
 
