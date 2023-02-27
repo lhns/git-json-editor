@@ -34,7 +34,7 @@ class GitJsonEditorComponent extends React.Component<{
         if (globalError != null) {
             return <div className="p-3">
                 <Alert>
-                    {globalError}
+                    <pre>{globalError}</pre>
                 </Alert>
             </div>
         } else {
@@ -120,7 +120,7 @@ class GitJsonEditorComponent extends React.Component<{
                                     }}/> :
                                 schemaError != null ?
                                     <Alert>
-                                        {schemaError}
+                                        <pre>{schemaError}</pre>
                                     </Alert> :
                                     null}
                         </div>

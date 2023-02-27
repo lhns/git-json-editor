@@ -33,6 +33,7 @@ class InternalJsonEditorComponent extends React.Component<{
         const editor = new JSONEditor(elem, {
             theme: 'bootstrap5',
             iconlib: 'openiconic',
+            show_errors: 'always',
             schema: schema,
             startval: initialData
         })
