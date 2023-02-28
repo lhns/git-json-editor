@@ -26,7 +26,7 @@ class GitCommitDialog extends React.Component<{
             onAuthFailure,
             onError
         } = this.props
-        const {disabled} = this.state || {}
+        const {disabled} = this.state ?? {}
 
         return <CommitDialog
             action={`Commit (${changes.length})`}

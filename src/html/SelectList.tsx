@@ -25,7 +25,7 @@ class SelectList extends React.Component<{
 
     render() {
         const {items, render, onSelect} = this.props
-        const {selected} = this.state || {}
+        const {selected} = this.state ?? {}
 
         return <table className="table table-sm table-hover">
             <tbody>

@@ -22,7 +22,7 @@ class AuthDialog extends React.Component<{
 
     render() {
         const {url, onAuth} = this.props
-        const {username, password, name, email} = this.state || {}
+        const {username, password, name, email} = this.state ?? {}
 
         const authFromInputs = () => {
             onAuth({
@@ -41,7 +41,7 @@ class AuthDialog extends React.Component<{
                     type="text"
                     className="form-control"
                     placeholder="Username"
-                    value={username || ''}
+                    value={username ?? ''}
                     onChange={event => {
                         const value = event.target.value
                         this.setState(state => ({...state, username: value}))
@@ -57,7 +57,7 @@ class AuthDialog extends React.Component<{
                     type="password"
                     className="form-control"
                     placeholder="Password"
-                    value={password || ''}
+                    value={password ?? ''}
                     onChange={event => {
                         const value = event.target.value
                         this.setState(state => ({...state, password: value}))
@@ -73,7 +73,7 @@ class AuthDialog extends React.Component<{
                     type="text"
                     className="form-control mt-2"
                     placeholder="Name"
-                    value={name || ''}
+                    value={name ?? ''}
                     onChange={event => {
                         const value = event.target.value
                         this.setState(state => ({...state, name: value}))
@@ -89,7 +89,7 @@ class AuthDialog extends React.Component<{
                     type="text"
                     className="form-control"
                     placeholder="Email"
-                    value={email || ''}
+                    value={email ?? ''}
                     onChange={event => {
                         const value = event.target.value
                         this.setState(state => ({...state, email: value}))

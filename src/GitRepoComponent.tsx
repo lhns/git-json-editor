@@ -26,7 +26,7 @@ class GitRepoComponent extends React.Component<{
 }> {
     private getChanges() {
         const {fs, onError} = this.props
-        const {repoDir} = this.state || {}
+        const {repoDir} = this.state ?? {}
         this.setState(state => ({...state, changes: undefined}))
         if (fs != null && repoDir != null) {
             git.statusMatrix({
@@ -53,10 +53,10 @@ class GitRepoComponent extends React.Component<{
 
     render() {
         const {fs, gitOpts, initialBranch, initialFile, onSelect, onBranchSelect, onAuthFailure, onError} = this.props
-        const {repoDir, branch, changes, selectedFilePath} = this.state || {}
+        const {repoDir, branch, changes, selectedFilePath} = this.state ?? {}
 
         return <div className="h-100 d-flex flex-column gap-1">
-            <div className="git-repo-title">
+            <div className="git-repo-title separator-bottom">
                 <a href={gitOpts.url}>{gitOpts.url}</a>
             </div>
             <div className="px-1">
@@ -84,7 +84,7 @@ class GitRepoComponent extends React.Component<{
                         fs={fs}
                         repoDir={repoDir}
                         branch={branch}
-                        changes={changes || []}
+                        changes={changes ?? []}
                         initialFilePath={selectedFilePath || (repoDir != null && initialFile != null ? resolve(repoDir, initialFile) : undefined)}
                         onSelect={filePath => {
                             this.setState(state => ({...state, selectedFilePath: filePath}))
@@ -105,7 +105,7 @@ class GitRepoComponent extends React.Component<{
                     gitOpts={gitOpts}
                     repoDir={repoDir}
                     branch={branch}
-                    changes={changes || []}
+                    changes={changes ?? []}
                     onCommit={(_, commitBranch) => {
                         this.getChanges()
                         if (commitBranch !== branch) {

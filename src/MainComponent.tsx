@@ -17,7 +17,7 @@ class MainComponent extends React.Component<{
 }> {
     render() {
         const {fs, gitOpts, client_ids, redirect_origin} = this.props
-        const {gitPlatform, author, credentials} = this.state || {}
+        const {gitPlatform, author, credentials} = this.state ?? {}
 
         return <AuthComponent
             url={gitOpts.url}

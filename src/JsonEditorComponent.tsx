@@ -28,6 +28,7 @@ class InternalJsonEditorComponent extends React.Component<{
 
     componentDidMount() {
         const {schema, data: initialData} = this.props
+
         const elem = document.createElement('div')
         this.root.current?.appendChild(elem)
         const editor = new JSONEditor(elem, {
@@ -85,6 +86,7 @@ class JsonEditorComponent extends React.Component<{
 }> {
     render() {
         const {schema, data, onChange} = this.props
+
         return <InternalJsonEditorComponent
             key={JSON.stringify([schema, data?.$schema])}
             schema={schema}

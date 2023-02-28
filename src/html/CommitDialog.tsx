@@ -12,7 +12,7 @@ class CommitDialog extends React.Component<{
 }> {
     render() {
         const {action, placeholderMessage, placeholderBranch, disabled, onConfirm} = this.props
-        const {message, branch} = this.state || {}
+        const {message, branch} = this.state ?? {}
 
         const confirm = () => {
             this.setState(state => ({
@@ -20,7 +20,7 @@ class CommitDialog extends React.Component<{
                 message: undefined,
                 branch: undefined
             }))
-            onConfirm(message || '', branch || '')
+            onConfirm(message ?? '', branch ?? '')
         }
 
         const branchNameFromMessage = (message: string) =>
@@ -35,7 +35,7 @@ class CommitDialog extends React.Component<{
                    className="form-control"
                    placeholder={placeholderMessage}
                    disabled={disabled}
-                   value={message || ''}
+                   value={message ?? ''}
                    onChange={event => {
                        const value = event.target.value
                        this.setState(state => ({
@@ -53,7 +53,7 @@ class CommitDialog extends React.Component<{
                    className="form-control"
                    placeholder={placeholderBranch}
                    disabled={disabled}
-                   value={branch || ''}
+                   value={branch ?? ''}
                    onChange={event => {
                        const value = event.target.value
                        this.setState(state => ({...state, branch: value}))

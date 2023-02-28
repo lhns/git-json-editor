@@ -99,12 +99,12 @@ class GitBranchSelectComponent extends React.Component<{
 
     render() {
         const {onSelect} = this.props
-        const {progress, repoDir, branches, selected} = this.state || {}
+        const {progress, repoDir, branches, selected} = this.state ?? {}
         const loading = progress ? progress.phase + '...' : 'Loading...'
 
         return <Select
             label="Branch"
-            items={branches || [loading]}
+            items={branches ?? [loading]}
             disabled={branches == null}
             selected={selected}
             onSelect={branch => {

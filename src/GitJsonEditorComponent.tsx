@@ -1,14 +1,13 @@
 import React from 'react'
 import GitRepoComponent from './GitRepoComponent'
-import JsonEditorComponent from "./JsonEditorComponent"
 import {loadSchema, relativePath} from "./Utils"
-import ScrollPane from "./html/ScrollPane"
 import * as git from "isomorphic-git"
 import {GitOpts} from "./GitBranchSelectComponent"
 import Alert from "./html/Alert"
 import {v4 as uuidv4} from "uuid"
 import {GitPlatform} from "./GitPlatform"
 import {dirname} from "@isomorphic-git/lightning-fs/src/path";
+import JsonEditorTabsComponent from "./JsonEditorTabsComponent";
 
 class GitJsonEditorComponent extends React.Component<{
     fs: git.PromiseFsClient,
@@ -25,7 +24,7 @@ class GitJsonEditorComponent extends React.Component<{
 }> {
     render() {
         const {fs, gitOpts, gitPlatform} = this.props
-        const {selectedFile, schema, data, update, schemaError, globalError} = this.state || {}
+        const {selectedFile, schema, data, update, schemaError, globalError} = this.state ?? {}
 
         const params = new URL(window.location.href).searchParams
         const initialBranch: string | null = params.get('branch')
@@ -39,14 +38,14 @@ class GitJsonEditorComponent extends React.Component<{
             </div>
         } else {
             return <div className="h-100 d-flex flex-row">
-                <div className="git-panel h-100">
+                <div className="git-panel separator-right h-100">
                     <GitRepoComponent
                         fs={fs}
                         gitOpts={gitOpts}
                         gitPlatform={gitPlatform}
                         update={update}
-                        initialBranch={initialBranch || undefined}
-                        initialFile={initialFile || undefined}
+                        initialBranch={initialBranch ?? undefined}
+                        initialFile={initialFile ?? undefined}
                         onSelect={(filePath, repoDir) => {
                             const newUrl = new URL(window.location.href)
                             newUrl.searchParams.set('file', relativePath(filePath, repoDir))
@@ -98,33 +97,31 @@ class GitJsonEditorComponent extends React.Component<{
                             this.setState(state => ({...state, globalError: error.stack}))
                         }}/>
                 </div>
-                <div className="flex-fill">
-                    <ScrollPane>
-                        <div className="p-2">
-                            {schema != null ?
-                                <JsonEditorComponent
-                                    schema={schema}
-                                    data={data}
-                                    onChange={(data: any) => {
-                                        this.setState(state => ({...state, data: data}))
-                                        if (selectedFile != null) {
-                                            const string = JSON.stringify(data, null, 2)
-                                            fs.promises.writeFile(
-                                                selectedFile,
-                                                string,
-                                                {encoding: 'utf8'}
-                                            ).then(() =>
-                                                this.setState(state => ({...state, update: (state.update || 0) + 1}))
-                                            )
-                                        }
-                                    }}/> :
-                                schemaError != null ?
-                                    <Alert>
-                                        <pre>{schemaError}</pre>
-                                    </Alert> :
-                                    null}
-                        </div>
-                    </ScrollPane>
+                <div className="flex-fill d-flex flex-column">
+                    {schema != null ?
+                        <JsonEditorTabsComponent
+                            schema={schema}
+                            data={data}
+                            onChange={(data: any) => {
+                                this.setState(state => ({...state, data: data}))
+                                if (selectedFile != null) {
+                                    const string = JSON.stringify(data, null, 2)
+                                    fs.promises.writeFile(
+                                        selectedFile,
+                                        string,
+                                        {encoding: 'utf8'}
+                                    ).then(() =>
+                                        this.setState(state => ({...state, update: (state.update ?? 0) + 1}))
+                                    )
+                                }
+                            }}/> :
+                        schemaError != null ?
+                            <div className="flex-fill p-2">
+                                <Alert>
+                                    <pre>{schemaError}</pre>
+                                </Alert>
+                            </div> :
+                            null}
                 </div>
             </div>
         }

@@ -17,7 +17,7 @@ class AuthComponent extends React.Component<{
     platformAndUserManager(): { gitPlatform: GitPlatform, userManager: UserManager } | null {
         const {url, client_ids, redirect_origin} = this.props
 
-        const {gitPlatform, authority, client_id} = ssoPlatform(url, client_ids) || {}
+        const {gitPlatform, authority, client_id} = ssoPlatform(url, client_ids) ?? {}
         if (gitPlatform == null || authority == null || client_id == null) return null
         const redirect_uri = window.location.href.replace(/^https?:\/\/[^\/?]*\/?/, redirect_origin)
         const userManager = gitPlatform.userManager(authority, client_id, redirect_uri)
@@ -28,7 +28,7 @@ class AuthComponent extends React.Component<{
     componentDidMount() {
         const {onAuth} = this.props
 
-        const {gitPlatform, userManager} = this.platformAndUserManager() || {}
+        const {gitPlatform, userManager} = this.platformAndUserManager() ?? {}
         if (gitPlatform != null && userManager != null) {
             userManager.getUser().then(user => {
                 if (user != null) {
@@ -53,10 +53,10 @@ class AuthComponent extends React.Component<{
                 if (user != null) {
                     onAuth(
                         gitPlatform,
-                        gitPlatform.oauthCredentials(user?.access_token || ''),
+                        gitPlatform.oauthCredentials(user?.access_token ?? ''),
                         {
-                            name: user.profile.name || '',
-                            email: user.profile.email || ''
+                            name: user.profile.name ?? '',
+                            email: user.profile.email ?? ''
                         })
                     this.setState(state => ({...state, authenticated: true}))
                 }
@@ -66,7 +66,7 @@ class AuthComponent extends React.Component<{
 
     render() {
         const {url, onAuth, children} = this.props
-        const {authenticated} = this.state || {}
+        const {authenticated} = this.state ?? {}
 
         if (authenticated) {
             return children

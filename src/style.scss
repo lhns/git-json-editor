@@ -13,14 +13,20 @@ html, body, #root {
   width: 0;
 }
 
+.separator-bottom {
+  border-bottom: 1px solid var(--bs-gray-300);
+}
+
+.separator-right {
+  border-right: 1px solid var(--bs-gray-300);
+}
+
 .git-panel {
   width: 18em;
-  border-right: 1px solid var(--bs-gray-300);
 }
 
 .git-repo-title {
   background-color: var(--bs-gray-100);
-  border-bottom: 1px solid var(--bs-gray-300);
   word-wrap: break-word;
 }
 
@@ -47,9 +53,17 @@ html, body, #root {
   color: var(--bs-blue);
 }
 
+.list-json-editor-panel {
+  flex-grow: 2 !important;
+}
+
 .je-switcher {
   padding: 0 2.5em 0 .5em !important;
   margin-bottom: .5em !important;
+}
+
+.simple-code-editor textarea {
+  outline: 0;
 }
 
 /*.btn-group>.btn-group:not(:first-child), .btn-group>.btn:not(:first-child) {

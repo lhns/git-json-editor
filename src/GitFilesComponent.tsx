@@ -89,12 +89,12 @@ class GitFilesComponent extends React.Component<{
 
     render() {
         const {repoDir, changes} = this.props
-        const {files, selected, loading} = this.state || {}
+        const {files, selected, loading} = this.state ?? {}
 
         return loading ?
             <CenteredSpinner/> :
             <SelectList
-                items={files || []}
+                items={files ?? []}
                 selected={selected}
                 render={filePath => {
                     const file = relativePath(filePath, repoDir)
