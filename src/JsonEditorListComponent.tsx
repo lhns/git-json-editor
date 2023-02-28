@@ -56,10 +56,10 @@ class JsonEditorListComponent extends React.Component<{
             <div className="flex-fill list-json-editor-panel">
                 <ScrollPane>
                     <div className="p-2">
-                        {selectedIndex != null && (data?.entries ?? [])[selectedIndex] ?
+                        {selectedIndex != null && data?.entries?.[selectedIndex] != null ?
                             <JsonEditorComponent
                                 schema={{$schema: schema?.$schema, ...(schema?.properties?.entries?.items ?? {})}}
-                                data={(data?.entries ?? [])[selectedIndex]}
+                                data={data?.entries?.[selectedIndex]}
                                 onChange={entryData => onChange({
                                     ...data,
                                     entries: (data?.entries ?? []).map((entry: any, i: number) => selectedIndex == i ? entryData : entry)

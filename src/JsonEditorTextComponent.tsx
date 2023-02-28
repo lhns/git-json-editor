@@ -19,13 +19,13 @@ class JsonEditorTextComponent extends React.Component<{
     componentDidUpdate(prevProps: any) {
         const {data} = this.props
 
-        if (data !== prevProps.data) {
+        if (JSON.stringify(data) !== JSON.stringify(prevProps.data)) {
             this.setState(state => ({...state, value: JSON.stringify(data, null, 2)}))
         }
     }
 
     render() {
-        const {schema, data, onChange} = this.props
+        const {data, onChange} = this.props
         const {value} = this.state ?? {}
 
         return data != null ? <Editor
