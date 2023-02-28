@@ -66,6 +66,24 @@ html, body, #root {
   outline: 0;
 }
 
+.json-editor.compact .card {
+  --bs-card-spacer-y: .5rem;
+  --bs-card-spacer-x: .5rem;
+}
+
+.json-editor.compact div[data-theme="bootstrap5"] .form-group {
+  margin-bottom: .5rem;
+}
+
+.json-editor.compact .form-label {
+  margin-bottom: .2rem;
+}
+
+.json-editor.compact .my-3 {
+  margin-top: .5rem !important;
+  margin-bottom: .5rem !important;
+}
+
 /*.btn-group>.btn-group:not(:first-child), .btn-group>.btn:not(:first-child) {
   margin-left: -1px;
 }*/

@@ -75,7 +75,7 @@ class InternalJsonEditorComponent extends React.Component<{
     }
 
     render() {
-        return <div ref={this.root}/>
+        return <div ref={this.root} className="json-editor compact"/>
     }
 }
 
