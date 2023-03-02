@@ -31,6 +31,18 @@ class JsonEditorListComponent extends React.Component<{
                                 }}>
                                 <tr>
                                     {headerFields.map(field => <th key={field}>{field}</th>)}
+                                    <th className="align-middle" style={{width: 0}}>
+                                        <div className="d-flex flex-row align-items-center justify-content-end gap-2">
+                                            <i className="list-button oi oi-plus"
+                                               onClick={event => {
+                                                   event.stopPropagation()
+                                                   onChange({
+                                                       ...data,
+                                                       entries: (data?.entries ?? []).concat([{}])
+                                                   })
+                                               }}/>
+                                        </div>
+                                    </th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -45,6 +57,75 @@ class JsonEditorListComponent extends React.Component<{
                                         style={{cursor: 'pointer'}}>
                                         {headerFields.map(field => <td
                                             key={field}>{(entry[field] ?? '').toString()}</td>)}
+                                        <td className="align-middle">
+                                            <div
+                                                className="d-flex flex-row align-items-center justify-content-end gap-2">
+                                                {i > 0 ?
+                                                    <i className="list-button oi oi-caret-top"
+                                                       onClick={event => {
+                                                           event.stopPropagation()
+                                                           onChange({
+                                                               ...data,
+                                                               entries: (() => {
+                                                                   const entries = (data?.entries ?? [])
+                                                                   let moveEntry: any = null
+                                                                   return entries.flatMap((entry: any, index: number) => {
+                                                                       if (moveEntry != null) {
+                                                                           const insertEntry = moveEntry
+                                                                           moveEntry = null
+                                                                           return [entry, insertEntry]
+                                                                       } else if (index == i - 1) {
+                                                                           moveEntry = entry
+                                                                           return []
+                                                                       } else {
+                                                                           return [entry]
+                                                                       }
+                                                                   })
+                                                               })()
+                                                           })
+                                                       }}/> : null}
+                                                {i + 1 < entries.length ?
+                                                    <i className="list-button oi oi-caret-bottom"
+                                                       onClick={event => {
+                                                           event.stopPropagation()
+                                                           onChange({
+                                                               ...data,
+                                                               entries: (() => {
+                                                                   const entries = (data?.entries ?? [])
+                                                                   let moveEntry: any = null
+                                                                   return entries.flatMap((entry: any, index: number) => {
+                                                                       if (moveEntry != null) {
+                                                                           const insertEntry = moveEntry
+                                                                           moveEntry = null
+                                                                           return [entry, insertEntry]
+                                                                       } else if (index == i) {
+                                                                           moveEntry = entry
+                                                                           return []
+                                                                       } else {
+                                                                           return [entry]
+                                                                       }
+                                                                   })
+                                                               })()
+                                                           })
+                                                       }}/> : null}
+                                                <i className="list-button oi oi-layers"
+                                                   onClick={event => {
+                                                       event.stopPropagation()
+                                                       onChange({
+                                                           ...data,
+                                                           entries: (data?.entries ?? []).flatMap((entry: any, index: number) => index == i ? [entry, entry] : entry)
+                                                       })
+                                                   }}/>
+                                                <i className="list-button oi oi-trash"
+                                                   onClick={event => {
+                                                       event.stopPropagation()
+                                                       onChange({
+                                                           ...data,
+                                                           entries: (data?.entries ?? []).filter((entry: any, index: number) => index != i)
+                                                       })
+                                                   }}/>
+                                            </div>
+                                        </td>
                                     </tr>
                                 })}
                                 </tbody>

@@ -49,7 +49,23 @@ html, body, #root {
   margin-left: 0.8em;
 }
 
+tbody > tr:not(:hover) .revert-button {
+  visibility: hidden;
+}
+
 .revert-button:hover {
+  color: var(--bs-blue);
+}
+
+tbody > tr:not(:hover) .list-button {
+  visibility: hidden;
+}
+
+.list-button {
+  cursor: pointer;
+}
+
+.list-button:hover {
   color: var(--bs-blue);
 }
 

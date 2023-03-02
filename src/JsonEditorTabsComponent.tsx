@@ -41,7 +41,7 @@ class JsonEditorTabsComponent extends React.Component<{
             </ScrollPane>
         }
 
-        const activeTabOrDefault = activeTab ?? Object.keys(tabs)[0]
+        const activeTabOrDefault = activeTab != null && tabs[activeTab] != null ? activeTab : Object.keys(tabs)[0]
 
         return <div className="d-flex flex-fill flex-column">
             <ul className="nav nav-tabs pt-1 px-1">
@@ -54,7 +54,7 @@ class JsonEditorTabsComponent extends React.Component<{
                 )}
             </ul>
             <div className="d-flex flex-fill flex-column">
-                {tabs[activeTabOrDefault]()}
+                {tabs?.[activeTabOrDefault]?.()}
             </div>
         </div>
     }
