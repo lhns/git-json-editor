@@ -143,7 +143,11 @@ class JsonEditorListComponent extends React.Component<{
                                 data={data?.entries?.[selectedIndex]}
                                 onChange={entryData => onChange({
                                     ...data,
-                                    entries: (data?.entries ?? []).map((entry: any, i: number) => selectedIndex == i ? entryData : entry)
+                                    entries: (data?.entries ?? []).map((entry: any, i: number) =>
+                                        selectedIndex == i ?
+                                            {...entryData, $schema: undefined} :
+                                            entry
+                                    )
                                 })}/> :
                             null}
                     </div>
