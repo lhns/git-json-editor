@@ -1,12 +1,11 @@
 import React from 'react'
 import GitRepoComponent from './GitRepoComponent'
-import {loadSchema, relativePath} from "./Utils"
+import {relativePath} from "./Utils"
 import * as git from "isomorphic-git"
 import {GitOpts} from "./GitBranchSelectComponent"
 import Alert from "./html/Alert"
 import {v4 as uuidv4} from "uuid"
 import {GitPlatform} from "./GitPlatform"
-import {dirname} from "@isomorphic-git/lightning-fs/src/path";
 import JsonEditorTabsComponent from "./JsonEditorTabsComponent";
 
 class GitJsonEditorComponent extends React.Component<{
@@ -16,7 +15,6 @@ class GitJsonEditorComponent extends React.Component<{
 }, {
     changeId?: string,
     selectedFile?: string,
-    schema?: string,
     data?: string,
     update: number,
     schemaError?: string,
@@ -24,7 +22,7 @@ class GitJsonEditorComponent extends React.Component<{
 }> {
     render() {
         const {fs, gitOpts, gitPlatform} = this.props
-        const {selectedFile, schema, data, update, schemaError, globalError} = this.state ?? {}
+        const {selectedFile, data, update, schemaError, globalError} = this.state ?? {}
 
         const params = new URL(window.location.href).searchParams
         const initialBranch: string | null = params.get('branch')
@@ -60,29 +58,18 @@ class GitJsonEditorComponent extends React.Component<{
                                 this.setState(state => ({...state, changeId}), resolve)
                             ).then(() =>
                                 fileContent
-                            ).then((string) =>
-                                loadSchema(
-                                    string,
-                                    fs,
-                                    dirname(filePath),
-                                    gitOpts.corsProxy
-                                )
-                            ).then(({schema, data}) => {
+                            ).then((data) =>
                                 this.setState((state) => state.changeId === changeId ? ({
                                     ...state,
-                                    selectedFile: data != null ? filePath : undefined,
-                                    schema,
-                                    data,
-                                    schemaError: undefined
+                                    selectedFile: filePath,
+                                    data
                                 }) : state)
-                            }).catch((error: Error) => {
+                            ).catch((error: Error) => {
                                 console.error(error)
                                 this.setState((state) => state.changeId === changeId ? ({
                                     ...state,
                                     selectedFile: undefined,
-                                    schema: undefined,
-                                    data: undefined,
-                                    schemaError: error.message
+                                    data: undefined
                                 }) : state)
                             })
                         }}
@@ -98,17 +85,18 @@ class GitJsonEditorComponent extends React.Component<{
                         }}/>
                 </div>
                 <div className="flex-fill d-flex flex-column">
-                    {schema != null ?
+                    {selectedFile != null && data != null ?
                         <JsonEditorTabsComponent
-                            schema={schema}
+                            fs={fs}
+                            gitOpts={gitOpts}
+                            filePath={selectedFile}
                             data={data}
-                            onChange={(data: any) => {
+                            onChange={(data: string) => {
                                 this.setState(state => ({...state, data: data}))
                                 if (selectedFile != null) {
-                                    const string = JSON.stringify(data, null, 2)
                                     fs.promises.writeFile(
                                         selectedFile,
-                                        string,
+                                        data,
                                         {encoding: 'utf8'}
                                     ).then(() =>
                                         this.setState(state => ({...state, update: (state.update ?? 0) + 1}))

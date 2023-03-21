@@ -3,38 +3,97 @@ import JsonEditorComponent from "./JsonEditorComponent";
 import ScrollPane from "./html/ScrollPane";
 import JsonEditorTextComponent from "./JsonEditorTextComponent";
 import JsonEditorListComponent from "./JsonEditorListComponent";
+import {loadSchema} from "./Utils";
+import {dirname} from "@isomorphic-git/lightning-fs/src/path";
+import * as git from "isomorphic-git";
+import {GitOpts} from "./GitBranchSelectComponent";
 
 class JsonEditorTabsComponent extends React.Component<{
-    schema: any,
-    data?: any,
-    onChange: (data: any) => void
+    fs: git.PromiseFsClient,
+    gitOpts: GitOpts,
+    filePath: string,
+    data: string,
+    onChange: (data: string) => void
 }, {
-    activeTab: string
+    activeTab: string,
+    jsonSchema?: unknown,
+    jsonData?: unknown,
+    schemaError?: string
 }> {
+    componentDidMount() {
+        this.updateSchema()
+    }
+
+    componentDidUpdate(prevProps: any) {
+        const {filePath, data} = this.props
+
+        if (prevProps.filePath !== filePath || prevProps.data !== data) {
+            this.updateSchema()
+        }
+    }
+
+    updateSchema() {
+        const {fs, gitOpts, filePath, data} = this.props
+
+        Promise.resolve().then(() =>
+            loadSchema(
+                data,
+                fs,
+                dirname(filePath),
+                gitOpts.corsProxy
+            )
+        ).then(({schema, data}) => {
+            console.log("json schema " + schema)
+            this.setState((state) => ({
+                ...state,
+                jsonSchema: schema,
+                jsonData: data,
+                schemaError: undefined
+            }))
+        }).catch((error: Error) => {
+            console.error(error)
+            this.setState((state) => ({
+                ...state,
+                jsonSchema: undefined,
+                jsonData: undefined,
+                schemaError: error.message
+            }))
+        })
+    }
+
     render() {
-        const {schema, data, onChange} = this.props
-        const {activeTab} = this.state ?? {}
+        const {data, onChange} = this.props
+        const {activeTab, jsonSchema, jsonData} = this.state ?? {}
 
         const tabs: Record<string, () => React.ReactNode> = {
-            "Form": () => <ScrollPane>
-                <div className="p-2">
-                    <JsonEditorComponent
-                        schema={schema}
-                        data={data}
-                        onChange={onChange}/>
-                </div>
-            </ScrollPane>,
-            ...(schema?.type === 'object' && schema?.properties?.entries?.type === 'array' ?
+            ...(jsonSchema != null ?
+                {
+                    "Form": () => <ScrollPane>
+                        <div className="p-2">
+                            <JsonEditorComponent
+                                schema={jsonSchema}
+                                data={jsonData}
+                                onChange={(data: unknown) => {
+                                    const string = JSON.stringify(data, null, 2)
+                                    onChange(string)
+                                }}/>
+                        </div>
+                    </ScrollPane>
+                } :
+                {}),
+            ...(jsonSchema != null && jsonSchema?.type === 'object' && jsonSchema?.properties?.entries?.type === 'array' ?
                 {
                     "List (beta)": () => <JsonEditorListComponent
-                        schema={schema}
-                        data={data}
-                        onChange={onChange}/>
+                        schema={jsonSchema}
+                        data={jsonData}
+                        onChange={(data: unknown) => {
+                            const string = JSON.stringify(data, null, 2)
+                            onChange(string)
+                        }}/>
                 } :
                 {}),
             "Text (beta)": () => <ScrollPane>
                 <div className="p-2"><JsonEditorTextComponent
-                    schema={schema}
                     data={data}
                     onChange={onChange}/>
                 </div>

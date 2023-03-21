@@ -5,22 +5,21 @@ import 'prismjs/components/prism-json'
 import 'prismjs/themes/prism.css'
 
 class JsonEditorTextComponent extends React.Component<{
-    schema: any,
-    data?: any,
+    data: string,
     onChange: (data: any) => void
 }, {
     value: string
 }> {
     constructor(props: any) {
         super(props)
-        this.state = {value: JSON.stringify(props.data, null, 2)}
+        this.state = {value: props.data}
     }
 
     componentDidUpdate(prevProps: any) {
         const {data} = this.props
 
-        if (JSON.stringify(data) !== JSON.stringify(prevProps.data)) {
-            this.setState(state => ({...state, value: JSON.stringify(data, null, 2)}))
+        if (data !== prevProps.data) {
+            this.setState(state => ({...state, value: data}))
         }
     }
 
@@ -34,7 +33,8 @@ class JsonEditorTextComponent extends React.Component<{
             onValueChange={code => {
                 this.setState(state => ({...state, value: code}))
                 try {
-                    onChange(JSON.parse(code))
+                    JSON.parse(code)
+                    onChange(code)
                 } catch (e) {
                 }
             }}
