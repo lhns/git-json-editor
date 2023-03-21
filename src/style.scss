@@ -100,6 +100,10 @@ tbody > tr:not(:hover) .list-button {
   margin-bottom: .5rem !important;
 }
 
+.json-editor .card-body > .btn-group:last-child {
+  margin-top: 0.5em;
+}
+
 /*.btn-group>.btn-group:not(:first-child), .btn-group>.btn:not(:first-child) {
   margin-left: -1px;
 }*/

@@ -36,7 +36,9 @@ class InternalJsonEditorComponent extends React.Component<{
             iconlib: 'openiconic',
             show_errors: 'always',
             schema: schema,
-            startval: initialData
+            startval: initialData,
+            disable_array_delete_last_row: true,
+            enable_array_copy: true
         })
         editor.ignoreInitialChange = true
         editor.on('change', () => {
