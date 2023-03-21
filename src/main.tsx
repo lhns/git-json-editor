@@ -6,6 +6,7 @@ import ReactDOM from 'react-dom/client'
 import http from 'isomorphic-git/http/web'
 import LightningFS from '@isomorphic-git/lightning-fs'
 import MainComponent from './MainComponent'
+import InputSubmit from "./html/InputSubmit"
 // @ts-ignore
 import * as bootstrap from 'bootstrap'
 // @ts-ignore
@@ -20,8 +21,17 @@ const url: string | null = params.get('url')
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
     <React.StrictMode>{
         url == null ?
-            <div>
-                No git url provided
+            <div className="container py-4">
+                <InputSubmit
+                    label="Clone URL"
+                    value=""
+                    action="OK"
+                    placeholder="URL"
+                    onSubmit={(url) => {
+                        const newUrl = new URL(window.location.href)
+                        newUrl.searchParams.set('url', url)
+                        window.location.href = newUrl.href
+                    }}/>
             </div> :
             <MainComponent
                 fs={fs}

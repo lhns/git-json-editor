@@ -4,7 +4,7 @@ class Select extends React.Component<{
     label?: string,
     items: string[],
     selected?: string,
-    disabled?: Boolean
+    disabled?: boolean
     onSelect: (item: string) => void
 }, {
     selected: string
